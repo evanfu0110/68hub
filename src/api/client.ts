@@ -97,9 +97,13 @@ export const api = {
     post<{ inserted: number; pages_fetched: number; sync_at: string }>(
       `/accounts/opencode/${id}/usage/sync`,
     ),
-  backfillUsage: (id: string) =>
+  backfillUsage: (id: string, pages?: number) =>
     post<{ inserted: number; pages_fetched: number; sync_at: string }>(
-      `/accounts/opencode/${id}/usage/backfill`,
+      `/accounts/opencode/${id}/usage/backfill${pages ? `?pages=${pages}` : ''}`,
+    ),
+  syncProgress: (id: string) =>
+    get<{ status: string; current: number; total: number; inserted: number }>(
+      `/accounts/opencode/${id}/usage/progress`,
     ),
 
   // Analytics

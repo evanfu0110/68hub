@@ -1,5 +1,5 @@
 import { app, BrowserWindow, ipcMain, Menu, shell } from 'electron';
-import { ChildProcess, spawn } from 'child_process';
+import { ChildProcess, spawn, execSync } from 'child_process';
 import path from 'path';
 
 app.commandLine.appendSwitch('disable-features', 'Autofill');
@@ -16,6 +16,18 @@ function backendPath(): string {
   if (isDev) return '';
   const ext = process.platform === 'win32' ? '.exe' : '';
   return path.join(process.resourcesPath, 'backend', `68backend${ext}`);
+}
+
+function killProcessTree(pid: number) {
+  try {
+    if (process.platform === 'win32') {
+      execSync(`taskkill /pid ${pid} /f /t`, { stdio: 'ignore' });
+    } else {
+      process.kill(-pid, 'SIGKILL');
+    }
+  } catch {
+    // process already dead
+  }
 }
 
 function startBackend() {
@@ -46,11 +58,15 @@ function startBackend() {
     console.log(`[backend] exited with code ${code}`);
     backendProcess = null;
   });
+
+  backendProcess.on('error', (err) => {
+    console.error(`[backend] error: ${err.message}`);
+  });
 }
 
 function stopBackend() {
-  if (backendProcess) {
-    backendProcess.kill();
+  if (backendProcess && backendProcess.pid) {
+    killProcessTree(backendProcess.pid);
     backendProcess = null;
   }
 }
@@ -104,6 +120,16 @@ ipcMain.handle('open-external', (_event, url: string) => {
   shell.openExternal(url);
 });
 
+ipcMain.handle('restart-backend', () => {
+  stopBackend();
+  startBackend();
+  return true;
+});
+
+ipcMain.handle('backend-pid', () => {
+  return backendProcess?.pid ?? null;
+});
+
 app.whenReady().then(() => {
   createWindow();
 
@@ -122,5 +148,9 @@ app.on('window-all-closed', () => {
 });
 
 app.on('before-quit', () => {
+  stopBackend();
+});
+
+app.on('will-quit', () => {
   stopBackend();
 });

@@ -1,8 +1,70 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePolling } from '../hooks/usePolling';
 import { api } from '../api/client';
+import { SyncProgressBar } from '../components/SyncProgress';
 import { useToast } from '../components/Toast';
 import type { OpenCodeAccount } from '../api/types';
+
+function BackendStatus() {
+  const [status, setStatus] = useState<'checking' | 'online' | 'offline'>('checking');
+  const [restarting, setRestarting] = useState(false);
+
+  const check = async () => {
+    setStatus('checking');
+    try {
+      const res = await fetch('http://127.0.0.1:8788/api/health');
+      if (res.ok) {
+        setStatus('online');
+      } else {
+        setStatus('offline');
+      }
+    } catch {
+      setStatus('offline');
+    }
+  };
+
+  useEffect(() => { check(); }, []);
+
+  const handleRestart = async () => {
+    setRestarting(true);
+    try {
+      if (window.electronAPI?.restartBackend) {
+        await window.electronAPI.restartBackend();
+      }
+      await new Promise((r) => setTimeout(r, 2000));
+      await check();
+    } finally {
+      setRestarting(false);
+    }
+  };
+
+  const dotColor = status === 'online' ? 'bg-success' : status === 'offline' ? 'bg-error' : 'bg-warning';
+  const label = status === 'online' ? '运行中' : status === 'offline' ? '未连接' : '检测中...';
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className={`w-2 h-2 rounded-full ${dotColor}`} />
+          <span className="text-sm text-base-content/70">状态</span>
+        </div>
+        <span className="text-sm font-medium">{label}</span>
+      </div>
+      <div className="flex items-center justify-between">
+        <span className="text-sm text-base-content/70">地址</span>
+        <span className="text-sm text-base-content/50 font-mono">http://127.0.0.1:8788</span>
+      </div>
+      <div className="flex gap-2">
+        <button className="btn btn-outline btn-sm" onClick={check}>
+          刷新状态
+        </button>
+        <button className="btn btn-outline btn-sm" onClick={handleRestart} disabled={restarting}>
+          {restarting ? <span className="loading loading-spinner loading-xs" /> : '重启后端'}
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export function Settings() {
   const { toast } = useToast();
@@ -15,12 +77,20 @@ export function Settings() {
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState<string | null>(null);
   const [syncing, setSyncing] = useState<string | null>(null);
+  const [syncProg, setSyncProg] = useState<Record<string, { status: string; current: number; total: number; inserted: number }>>({});
+  const syncTimerRef = useRef<Record<string, ReturnType<typeof setInterval>>>({});
   const [autoSync, setAutoSync] = useState(true);
   const [syncInterval, setSyncInterval] = useState(300);
   const [backfillPages, setBackfillPages] = useState(100);
   const [deleteTarget, setDeleteTarget] = useState<OpenCodeAccount | null>(null);
   const addModal = useRef<HTMLDialogElement>(null);
   const deleteModal = useRef<HTMLDialogElement>(null);
+
+  useEffect(() => {
+    return () => {
+      Object.values(syncTimerRef.current).forEach(clearInterval);
+    };
+  }, []);
 
   const accounts = config?.opencode_accounts ?? [];
 
@@ -44,18 +114,52 @@ export function Settings() {
     }
   };
 
+  const startPollProgress = (id: string) => {
+    const poll = async () => {
+      try {
+        const p = await api.syncProgress(id);
+        if (p.status !== 'idle') {
+          setSyncProg((prev) => ({ ...prev, [id]: p }));
+        }
+        if (p.status === 'done') {
+          toast(`同步完成! 新增 ${p.inserted} 条`, 'success');
+          stopPollProgress(id);
+          setSyncing(null);
+          refetch();
+        } else if (p.status === 'error' || p.status === 'timeout') {
+          toast('同步失败', 'error');
+          stopPollProgress(id);
+          setSyncing(null);
+        }
+      } catch {
+        // ignore poll errors
+      }
+    };
+    syncTimerRef.current[id] = setInterval(poll, 800);
+    poll();
+  };
+
+  const stopPollProgress = (id: string) => {
+    if (syncTimerRef.current[id]) {
+      clearInterval(syncTimerRef.current[id]);
+      delete syncTimerRef.current[id];
+    }
+  };
+
   const doSync = async (id: string, mode: 'sync' | 'backfill') => {
     setSyncing(id);
+    setSyncProg((prev) => ({ ...prev, [id]: { status: 'running', current: 0, total: mode === 'backfill' ? backfillPages : 0, inserted: 0 } }));
+    startPollProgress(id);
     try {
-      const fn = mode === 'sync' ? api.syncUsage : api.backfillUsage;
-      const result = await fn(id);
-      const label = mode === 'sync' ? '同步' : '回填';
-      toast(`${label}完成! 新增 ${result.inserted} 条，拉了 ${result.pages_fetched} 页`, 'success');
-      refetch();
+      if (mode === 'backfill') {
+        await api.backfillUsage(id, backfillPages);
+      } else {
+        await api.syncUsage(id);
+      }
     } catch (e) {
-      toast('操作失败: ' + (e as Error).message, 'error');
-    } finally {
+      stopPollProgress(id);
       setSyncing(null);
+      toast('操作失败: ' + (e as Error).message, 'error');
     }
   };
 
@@ -133,7 +237,7 @@ export function Settings() {
   };
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="space-y-6 max-w-4xl">
       <div>
         <h1 className="text-lg font-bold text-base-content">设置</h1>
         <p className="text-xs text-base-content/40 mt-1">管理 OpenCode Go 账户和数据同步</p>
@@ -185,24 +289,14 @@ export function Settings() {
                       ? <span className="loading loading-spinner loading-xs" />
                       : '测试'}
                   </button>
-                  <button
-                    className="btn btn-xs btn-ghost"
-                    onClick={() => doSync(account.id, 'sync')}
-                    disabled={syncing === account.id}
-                  >
-                    {syncing === account.id
-                      ? <span className="loading loading-spinner loading-xs" />
-                      : '同步'}
-                  </button>
-                  <button
-                    className="btn btn-xs btn-ghost"
-                    onClick={() => doSync(account.id, 'backfill')}
-                    disabled={syncing === account.id}
-                  >
-                    {syncing === account.id
-                      ? <span className="loading loading-spinner loading-xs" />
-                      : '回填'}
-                  </button>
+                  {syncing === account.id && syncProg[account.id] ? (
+                    <SyncProgressBar {...syncProg[account.id]} />
+                  ) : (
+                    <>
+                      <button className="btn btn-xs btn-ghost" onClick={() => doSync(account.id, 'sync')}>同步</button>
+                      <button className="btn btn-xs btn-ghost" onClick={() => doSync(account.id, 'backfill')}>回填</button>
+                    </>
+                  )}
                   <button
                     className="btn btn-xs btn-ghost text-error"
                     onClick={() => confirmDelete(account)}
@@ -264,10 +358,11 @@ export function Settings() {
               <div className="text-[11px] text-base-content/40 mt-0.5">每页 50 条，从最深的历史记录往前拉</div>
             </div>
             <select
-              className="select select-bordered select-sm w-28"
+              className="select select-bordered select-sm w-32"
               value={backfillPages}
               onChange={(e) => setBackfillPages(Number(e.target.value))}
             >
+              <option value={100}>100 页</option>
               <option value={200}>200 页</option>
               <option value={500}>500 页</option>
               <option value={1000}>1000 页</option>
@@ -278,6 +373,11 @@ export function Settings() {
             保存回填设置
           </button>
         </div>
+      </div>
+
+      <div className="border border-base-200 rounded-xl p-4" id="backend-status">
+        <h2 className="text-sm font-bold text-base-content/70 mb-4">后端服务</h2>
+        <BackendStatus />
       </div>
 
       <div className="border border-base-200 rounded-xl p-4 space-y-3">

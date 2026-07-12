@@ -13,6 +13,8 @@ export type ElectronAPI = {
     isMaximized: () => Promise<boolean>;
   };
   openExternal: (url: string) => Promise<void>;
+  restartBackend: () => Promise<boolean>;
+  backendPid: () => Promise<number | null>;
 };
 
 declare global {

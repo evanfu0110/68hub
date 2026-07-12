@@ -15,4 +15,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
     isMaximized: () => ipcRenderer.invoke('window-is-maximized'),
   },
   openExternal: (url: string) => ipcRenderer.invoke('open-external', url),
+  restartBackend: () => ipcRenderer.invoke('restart-backend'),
+  backendPid: () => ipcRenderer.invoke('backend-pid'),
 });

@@ -24,6 +24,7 @@ from .schemas import (
     OpenCodeAccountUpdate,
     ServiceConfigUpdate,
 )
+from . import sync_progress
 from .usage_sync import backfill_usage, sync_usage
 
 FRONTEND_DIST = Path(__file__).resolve().parents[2] / "frontend" / "dist"
@@ -292,6 +293,11 @@ async def usage_backfill(
         return result.to_dict()
     except Exception as exc:
         raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+
+@accounts_router.get("/opencode/{account_id}/usage/progress")
+async def usage_sync_progress(account_id: str) -> dict[str, Any]:
+    return sync_progress.get(account_id) if db.get_opencode_account(account_id) else {"status": "idle", "current": 0, "total": 0, "inserted": 0}
 
 
 @accounts_router.get("/ollama")

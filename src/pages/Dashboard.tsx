@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { usePolling } from '../hooks/usePolling';
 import { api } from '../api/client';
-import { Loading } from '../components/Loading';
 import { ModelIcon } from '../components/ModelIcon';
 import { UsageTable } from '../components/UsageTable';
 import type { QuotaWindow } from '../api/types';
@@ -165,7 +164,16 @@ export function Dashboard() {
   }, [overview, tokens]);
 
   if (loading && !data) {
-    return <Loading />;
+    return (
+      <div className="flex items-center justify-center min-h-[calc(100vh-86px)]">
+        <div className="w-48 space-y-2">
+          <div className="h-1 bg-base-200 rounded-full overflow-hidden relative">
+            <div className="absolute inset-0 h-full bg-gradient-to-r from-primary to-secondary rounded-full animate-loading-bar" />
+          </div>
+          <p className="text-[11px] text-base-content/40 text-center">加载中...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
