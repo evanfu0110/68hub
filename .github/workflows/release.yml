@@ -94,4 +94,3 @@ jobs:
             - `68HUB Setup *.exe` → MD5: `${{ steps.md5.outputs.md5 }}`
           files: |
             release/68HUB Setup *.exe
-            release/68HUB Setup *.exe.blockmap
