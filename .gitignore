@@ -24,8 +24,7 @@ cola/backend/build/
 cola/backend/*.spec
 cola/backend/.venv/
 
-# Auto-generated icons
-build/
+# App icon (auto-generated, tracked in git)
 
 # opencode skill files
 .agents/

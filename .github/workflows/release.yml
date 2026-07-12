@@ -47,9 +47,6 @@ jobs:
           pip install -e .
           pip install pyinstaller
 
-      - name: Generate icons
-        run: node scripts/generate-icon.mjs
-
       - name: Build frontend + Electron
         run: pnpm build
 
