@@ -1,0 +1,30 @@
+# Auto detect text files and set LF line endings
+* text=auto
+
+# Batch files should use CRLF
+*.bat text eol=crlf
+
+# Shell scripts should use LF
+*.sh text eol=lf
+
+# Source files - normalize to LF
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.mjs text eol=lf
+*.json text eol=lf
+*.css text eol=lf
+*.html text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.toml text eol=lf
+*.py text eol=lf
+*.lock -text
+
+# Binary files
+*.ico binary
+*.png binary
+*.svg text eol=lf
+*.ttf binary
+*.exe binary

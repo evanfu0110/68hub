@@ -1,0 +1,92 @@
+{
+  "name": "68hub",
+  "version": "1.0.0",
+  "description": "OpenCode Go 用量统计面板",
+  "main": "dist-electron/main.js",
+  "author": "68HUB",
+  "license": "MIT",
+  "scripts": {
+    "dev": "pnpm build:electron && concurrently -k \"pnpm dev:vite\" \"wait-on dist-electron/main.js http://localhost:5173 && electron .\"",
+    "dev:vite": "vite",
+    "build": "pnpm build:vite && pnpm build:electron",
+    "build:vite": "vite build",
+    "build:electron": "tsc --project electron/tsconfig.json",
+    "dist": "pnpm build:icon && pnpm build && pnpm build:backend && npx --yes electron-builder@25 --win",
+    "dist:dir": "pnpm build:icon && pnpm build && pnpm build:backend && npx --yes electron-builder@25 --win --dir",
+    "build:icon": "node scripts/generate-icon.mjs",
+    "build:backend": "scripts\\build-backend.bat",
+    "postinstall": "pnpm build:electron",
+    "preview": "vite preview",
+    "electron": "electron ."
+  },
+  "build": {
+    "appId": "com.68hub.app",
+    "productName": "68HUB",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*",
+      "public/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "dist-electron/backend",
+        "to": "backend",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "win": {
+      "icon": "build/icon.png",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "68HUB",
+      "language": "2052",
+      "unicode": true,
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico"
+    }
+  },
+  "keywords": [
+    "electron",
+    "react",
+    "vite",
+    "opencode",
+    "go"
+  ],
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "concurrently": "^8.2.2",
+    "electron": "^31.0.0",
+    "sharp": "^0.35.3",
+    "typescript": "^5.4.5",
+    "vite": "^5.2.12",
+    "wait-on": "^7.2.0"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.3.2",
+    "daisyui": "^5.6.17",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^7.18.1",
+    "recharts": "^3.9.2",
+    "tailwindcss": "^4.3.2"
+  }
+}

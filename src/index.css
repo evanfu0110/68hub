@@ -1,0 +1,87 @@
+@import "tailwindcss";
+@plugin "daisyui" {
+  themes: cupcake --default;
+}
+
+@font-face {
+  font-family: "F1";
+  src: url("./assets/fonts/f1.ttf") format("truetype");
+  font-weight: 400 700;
+  font-style: normal;
+}
+
+html {
+  user-select: none;
+  overflow: hidden;
+}
+
+body {
+  margin: 0;
+  font-family: "F1", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  overflow: hidden;
+}
+
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar {
+  display: none;
+}
+
+.content-area {
+  height: calc(100vh - 38px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.input-native {
+  @apply input input-sm w-full border border-base-300 focus:outline-none focus:border-primary/40 transition-colors px-3 py-2.5;
+}
+
+.input-native::placeholder {
+  color: oklch(0.6 0.02 80);
+}
+
+.recharts-wrapper {
+  user-select: none !important;
+  outline: none !important;
+  overflow: visible;
+}
+
+.recharts-surface {
+  user-select: none !important;
+  outline: none !important;
+  overflow: visible;
+}
+
+.recharts-legend-wrapper,
+.recharts-tooltip-wrapper,
+.recharts-cartesian-grid,
+.recharts-cartesian-axis {
+  user-select: none !important;
+  outline: none !important;
+}
+
+.recharts-surface * {
+  outline: none !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+*:focus {
+  outline: none !important;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.page-enter {
+  animation: fadeIn 0.25s ease-out;
+}
