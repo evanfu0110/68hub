@@ -56,8 +56,8 @@
       "shortcutName": "68HUB",
       "language": "2052",
       "unicode": true,
-      "installerIcon": "build/icon.ico",
-      "uninstallerIcon": "build/icon.ico"
+      "installerIcon": "public/icon.ico",
+      "uninstallerIcon": "public/icon.ico"
     }
   },
   "keywords": [
