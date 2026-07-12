@@ -1,0 +1,98 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Version tag (e.g. v1.0.0)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python dependencies & PyInstaller
+        working-directory: cola/backend
+        run: |
+          pip install -e .
+          pip install pyinstaller
+
+      - name: Generate icons
+        run: node scripts/generate-icon.mjs
+
+      - name: Build frontend + Electron
+        run: pnpm build
+
+      - name: Build backend (PyInstaller)
+        working-directory: cola/backend
+        run: pyinstaller --onefile --clean --name 68backend --add-data "app;app" run.py
+
+      - name: Copy backend to dist-electron
+        run: |
+          if (-not (Test-Path dist-electron/backend)) { New-Item -ItemType Directory -Path dist-electron/backend -Force }
+          Copy-Item cola/backend/dist/68backend.exe dist-electron/backend/68backend.exe -Force
+
+      - name: Package with electron-builder
+        run: npx --yes electron-builder@25 --win --publish never
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate MD5
+        id: md5
+        shell: pwsh
+        run: |
+          $hash = (Get-FileHash -Path "release\68HUB Setup *.exe" -Algorithm MD5).Hash.ToLower()
+          echo "md5=$hash" >> $env:GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          body: |
+            ## 68HUB ${{ github.ref_name }}
+
+            OpenCode Go 平价 Coding Plan 用量统计桌面应用。
+
+            ### 功能
+            - 📊 用量统计总览：账户配额、Token 消耗一目了然
+            - 📈 各模型 Token 消耗排行与每日趋势
+            - 📅 每日费用与请求量趋势分析
+            - 📋 完整使用记录查询与筛选
+            - ⚙️ 多账户管理与自动同步
+
+            ### 文件校验
+            - `68HUB Setup *.exe` → MD5: `${{ steps.md5.outputs.md5 }}`
+          files: |
+            release/68HUB Setup *.exe
+            release/68HUB Setup *.exe.blockmap
