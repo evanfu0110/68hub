@@ -24,8 +24,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/evanfu0110/68hub/releases/latest">
-    <img src="https://img.shields.io/github/v/release/evanfu0110/68hub?label=下载&logo=download&style=for-the-badge" />
+  <a href="https://github.com/evanfu0110/68hub/releases">
+    <img src="https://img.shields.io/badge/下载-v1.0.0-4FC08D?logo=download&style=for-the-badge" />
   </a>
 </p>
 
