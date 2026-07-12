@@ -282,7 +282,7 @@ async def usage_sync(
 @accounts_router.post("/opencode/{account_id}/usage/backfill")
 async def usage_backfill(
     account_id: str,
-    pages: int = Query(30, ge=1, le=100),
+    pages: int = Query(100, ge=1, le=1000),
 ) -> dict[str, Any]:
     row = db.get_opencode_account(account_id)
     if row is None:

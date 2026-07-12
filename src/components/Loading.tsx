@@ -1,10 +1,11 @@
 export function Loading() {
   return (
     <div className="flex items-center justify-center h-48">
-      <div className="relative flex items-center justify-center">
-        <div className="w-8 h-8 rounded-full border-2 border-base-200" />
-        <div className="absolute w-8 h-8 rounded-full border-2 border-transparent border-t-primary animate-spin" />
-        <div className="absolute w-5 h-5 rounded-full bg-primary/10" />
+      <div className="w-48 space-y-2">
+        <div className="h-1 bg-base-200 rounded-full overflow-hidden relative">
+          <div className="absolute inset-0 h-full bg-gradient-to-r from-primary to-secondary rounded-full animate-loading-bar" />
+        </div>
+        <p className="text-[11px] text-base-content/40 text-center">加载中...</p>
       </div>
     </div>
   );

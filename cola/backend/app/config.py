@@ -21,7 +21,7 @@ DEFAULT_SETTINGS_PAYLOAD: dict[str, Any] = {
     "usage_sync": {
         "auto_sync": True,
         "interval_sec": 300,
-        "backfill_pages_per_request": 30,
+        "backfill_pages_per_request": 100,
         "max_pages_per_incremental": 30,
     },
     "opencode": {
@@ -63,7 +63,7 @@ class OpenCodeSettings:
 class UsageSyncSettings:
     auto_sync: bool = True
     interval_sec: int = 300
-    backfill_pages_per_request: int = 5
+    backfill_pages_per_request: int = 100
     max_pages_per_incremental: int = 10
 
 
@@ -108,14 +108,14 @@ def _parse_usage_sync_settings(raw: dict[str, Any] | None) -> UsageSyncSettings:
     if not isinstance(raw, dict):
         return UsageSyncSettings()
     interval = raw.get("interval_sec", 300)
-    backfill = raw.get("backfill_pages_per_request", 5)
+    backfill = raw.get("backfill_pages_per_request", 100)
     max_pages = raw.get("max_pages_per_incremental", 10)
     try:
         interval_sec = max(15, int(interval))
     except (TypeError, ValueError):
         interval_sec = 300
     try:
-        backfill_pages = max(1, min(int(backfill), 50))
+        backfill_pages = max(1, min(int(backfill), 1000))
     except (TypeError, ValueError):
         backfill_pages = 5
     try:

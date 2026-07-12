@@ -61,7 +61,7 @@ class RefreshSettingsUpdate(BaseModel):
 class UsageSyncSettingsUpdate(BaseModel):
     auto_sync: bool | None = None
     interval_sec: int | None = Field(default=None, ge=15)
-    backfill_pages_per_request: int | None = Field(default=None, ge=1, le=50)
+    backfill_pages_per_request: int | None = Field(default=None, ge=1, le=1000)
     max_pages_per_incremental: int | None = Field(default=None, ge=1, le=100)
 
 

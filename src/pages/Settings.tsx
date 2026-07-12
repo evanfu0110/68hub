@@ -17,13 +17,12 @@ export function Settings() {
   const [syncing, setSyncing] = useState<string | null>(null);
   const [autoSync, setAutoSync] = useState(true);
   const [syncInterval, setSyncInterval] = useState(300);
-  const [backfillPages, setBackfillPages] = useState(30);
+  const [backfillPages, setBackfillPages] = useState(100);
   const [deleteTarget, setDeleteTarget] = useState<OpenCodeAccount | null>(null);
   const addModal = useRef<HTMLDialogElement>(null);
   const deleteModal = useRef<HTMLDialogElement>(null);
 
   const accounts = config?.opencode_accounts ?? [];
-  const usageSync = config?.usage_sync;
 
   const openAdd = () => {
     setForm({ name: '', auth_cookie: '', workspace_id: 'Default' });
@@ -110,7 +109,6 @@ export function Settings() {
         usage_sync: {
           auto_sync: autoSync,
           interval_sec: syncInterval,
-          backfill_pages_per_request: backfillPages,
         },
       });
       toast('同步设置已保存', 'success');
@@ -120,11 +118,25 @@ export function Settings() {
     }
   };
 
+  const saveBackfillSettings = async () => {
+    try {
+      await api.updateConfig({
+        usage_sync: {
+          backfill_pages_per_request: backfillPages,
+        },
+      });
+      toast('回填设置已保存', 'success');
+      refetch();
+    } catch (e) {
+      toast('保存失败: ' + (e as Error).message, 'error');
+    }
+  };
+
   return (
     <div className="space-y-6 max-w-3xl">
       <div>
-        <h1 className="text-xl font-semibold text-base-content">设置</h1>
-        <p className="text-sm text-base-content/60 mt-1">管理 OpenCode Go 账户和同步设置</p>
+        <h1 className="text-lg font-bold text-base-content">设置</h1>
+        <p className="text-xs text-base-content/40 mt-1">管理 OpenCode Go 账户和数据同步</p>
       </div>
 
       <div className="border border-base-200 rounded-xl p-4">
@@ -205,10 +217,13 @@ export function Settings() {
       </div>
 
       <div className="border border-base-200 rounded-xl p-4">
-        <h2 className="text-sm font-bold text-base-content/70 mb-3">自动同步</h2>
+        <h2 className="text-sm font-bold text-base-content/70 mb-4">自动同步</h2>
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-base-content/60">自动同步</span>
+            <div>
+              <div className="text-sm text-base-content/70">自动同步</div>
+              <div className="text-[11px] text-base-content/40 mt-0.5">定时拉取最新的使用记录</div>
+            </div>
             <input
               type="checkbox"
               className="toggle toggle-sm"
@@ -216,8 +231,12 @@ export function Settings() {
               onChange={(e) => setAutoSync(e.target.checked)}
             />
           </div>
+
           <div className="flex items-center justify-between">
-            <span className="text-sm text-base-content/60">同步间隔</span>
+            <div>
+              <div className="text-sm text-base-content/70">同步间隔</div>
+              <div className="text-[11px] text-base-content/40 mt-0.5">每次自动同步的时间间隔</div>
+            </div>
             <select
               className="select select-bordered select-sm w-28"
               value={syncInterval}
@@ -229,39 +248,67 @@ export function Settings() {
               <option value={1800}>30 分钟</option>
             </select>
           </div>
+
+          <button className="btn btn-primary btn-sm" onClick={saveSyncSettings}>
+            保存同步设置
+          </button>
+        </div>
+      </div>
+
+      <div className="border border-base-200 rounded-xl p-4">
+        <h2 className="text-sm font-bold text-base-content/70 mb-4">历史回填</h2>
+        <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-base-content/60">回填页数</span>
+            <div>
+              <div className="text-sm text-base-content/70">回填页数</div>
+              <div className="text-[11px] text-base-content/40 mt-0.5">每页 50 条，从最深的历史记录往前拉</div>
+            </div>
             <select
               className="select select-bordered select-sm w-28"
               value={backfillPages}
               onChange={(e) => setBackfillPages(Number(e.target.value))}
             >
-              <option value={10}>10 页</option>
-              <option value={30}>30 页</option>
-              <option value={50}>50 页</option>
-              <option value={100}>100 页</option>
+              <option value={200}>200 页</option>
+              <option value={500}>500 页</option>
+              <option value={1000}>1000 页</option>
             </select>
           </div>
-          <button className="btn btn-primary btn-sm" onClick={saveSyncSettings}>
-            保存同步设置
+
+          <button className="btn btn-primary btn-sm" onClick={saveBackfillSettings}>
+            保存回填设置
           </button>
-          {usageSync && (
-            <div className="text-[11px] text-base-content/40 space-y-0.5 pt-2 border-t border-base-200">
-              <p>当前状态: {usageSync.auto_sync ? '运行中' : '已停止'}</p>
-              <p>当前间隔: {usageSync.interval_sec} 秒</p>
-              <p>总记录数: {usageSync.max_pages_per_incremental} 页/次</p>
-            </div>
-          )}
         </div>
       </div>
 
-      <div className="border border-base-200 rounded-xl p-4">
-        <h2 className="text-sm font-bold text-base-content/70 mb-3">多账户支持说明</h2>
-        <div className="text-sm text-base-content/60 leading-relaxed space-y-2">
-          <p>68HUB 支持添加多个 OpenCode Go 账户，每个账户独立管理自己的 Cookie 和 Workspace。</p>
-          <p><span className="font-semibold text-base-content">配额展示：</span>主页左侧的「账户配额状态」卡片会列出所有已启用账户的配额进度条，每个账户独立显示 5h / 7d / 30d 三个时间窗口的占用比例。</p>
-          <p><span className="font-semibold text-base-content">Token 统计：</span>所有账户的使用记录汇总到同一数据库，图表和排行展示的是跨账户的合并数据。你可以在「使用记录」页按账户筛选查看明细。</p>
-          <p><span className="font-semibold text-base-content">独立控制：</span>每个账户可以单独启用/禁用，禁用的账户不会拉取配额和同步使用记录。</p>
+      <div className="border border-base-200 rounded-xl p-4 space-y-3">
+        <h2 className="text-sm font-bold text-base-content/70">说明</h2>
+
+        <div className="text-sm text-base-content/60 leading-relaxed space-y-3">
+          <div>
+            <h3 className="text-sm font-semibold text-base-content mb-1">同步 vs 回填</h3>
+            <p className="text-xs text-base-content/50">
+              <span className="font-medium text-base-content/70">同步</span> 是从当前位置往前翻，拉取最新的使用记录。启用自动同步后，后台会按设定的间隔自动执行。
+              点击账户旁的「同步」按钮可手动触发。
+            </p>
+            <p className="text-xs text-base-content/50 mt-2">
+              <span className="font-medium text-base-content/70">回填</span> 是从已拉到的最深处继续往前翻，专门用来拉取历史数据。
+              新添加的账户需要先回填才能看到过去的记录。页数越大拉得越多。
+            </p>
+          </div>
+
+          <div>
+            <h3 className="text-sm font-semibold text-base-content mb-1">新用户与老用户</h3>
+            <p className="text-xs text-base-content/50">
+              <span className="font-medium text-base-content/70">新 OpenCode Go 用户：</span>
+              添加账户后，点击「同步」拉取最近的记录即可使用。自动同步默认开启，后续数据会自动更新。
+            </p>
+            <p className="text-xs text-base-content/50 mt-2">
+              <span className="font-medium text-base-content/70">已使用 OpenCode Go 的用户：</span>
+              添加账户后，先点「同步」拉取最新数据，再点「回填」拉取历史记录。
+              建议先设置回填 500~1000 页，然后点击账户旁的「回填」按钮。
+              回填完成后，主页和统计页面就能看到完整数据。
+            </p>
+          </div>
         </div>
       </div>
 
