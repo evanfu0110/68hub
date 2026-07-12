@@ -24,8 +24,6 @@ cola/backend/build/
 cola/backend/*.spec
 cola/backend/.venv/
 
-# App icon (auto-generated, tracked in git)
-
 # opencode skill files
 .agents/
 skills-lock.json
