@@ -51,9 +51,10 @@ jobs:
         id: md5
         shell: pwsh
         run: |
-          $hash = (Get-FileHash -Path "release\68HUB Setup *.exe" -Algorithm MD5).Hash.ToLower()
+          $exe = Get-ChildItem "release\68HUB Setup*.exe" | Select-Object -First 1
+          $hash = (Get-FileHash -Path $exe.FullName -Algorithm MD5).Hash.ToLower()
           echo "md5=$hash" >> $env:GITHUB_OUTPUT
-          echo "file=68HUB Setup $((Get-Item release\68HUB Setup*.exe).Name)" >> $env:GITHUB_OUTPUT
+          echo "file=$($exe.Name)" >> $env:GITHUB_OUTPUT
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
@@ -86,4 +87,4 @@ jobs:
             ### 文件校验
             - `${{ steps.md5.outputs.file }}` → MD5: `${{ steps.md5.outputs.md5 }}`
           files: |
-            release/68HUB Setup *.exe
+            release/*.exe
