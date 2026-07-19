@@ -1,73 +1,120 @@
-import { app, BrowserWindow, ipcMain, Menu, shell } from 'electron';
-import { ChildProcess, spawn, execSync } from 'child_process';
+import { app, BrowserWindow, ipcMain, Menu, nativeImage, shell, Tray } from 'electron';
 import path from 'path';
+import fs from 'fs';
+import {
+  isBackendRunning,
+  restartBackendServer,
+  startBackendServer,
+  stopBackendServer,
+} from './backend/server';
 
 app.commandLine.appendSwitch('disable-features', 'Autofill');
 
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
 
 let mainWindow: BrowserWindow | null = null;
-let backendProcess: ChildProcess | null = null;
+let tray: Tray | null = null;
+let trayMode = false;
+let trayConfigured = false;
 
 const BACKEND_PORT = 8788;
 const BACKEND_HOST = '127.0.0.1';
 
-function backendPath(): string {
-  if (isDev) return '';
-  const ext = process.platform === 'win32' ? '.exe' : '';
-  return path.join(process.resourcesPath, 'backend', `68backend${ext}`);
+function trayConfigPath(): string {
+  return path.join(app.getPath('userData'), 'tray.json');
 }
 
-function killProcessTree(pid: number) {
+function saveTrayPreference(mode: boolean, configured: boolean) {
+  trayMode = mode;
+  trayConfigured = configured;
   try {
-    if (process.platform === 'win32') {
-      execSync(`taskkill /pid ${pid} /f /t`, { stdio: 'ignore' });
-    } else {
-      process.kill(-pid, 'SIGKILL');
-    }
+    fs.mkdirSync(path.dirname(trayConfigPath()), { recursive: true });
+    fs.writeFileSync(trayConfigPath(), JSON.stringify({ trayMode: mode, trayConfigured: configured }), 'utf-8');
   } catch {
-    // process already dead
+    // ignore
   }
 }
 
-function startBackend() {
-  const binPath = backendPath();
-  if (!binPath) return;
+function loadTrayPreference() {
+  try {
+    const raw = fs.readFileSync(trayConfigPath(), 'utf-8');
+    const data = JSON.parse(raw);
+    trayMode = data.trayMode === true;
+    trayConfigured = data.trayConfigured === true;
+  } catch {
+    trayMode = false;
+    trayConfigured = false;
+  }
+}
 
-  const env = {
-    ...process.env,
-    '68BACKEND_DATA': path.join(app.getPath('userData'), 'data'),
-    '68BACKEND_LISTEN_HOST': BACKEND_HOST,
-    '68BACKEND_LISTEN_PORT': String(BACKEND_PORT),
-  };
+function backendDataDir(): string {
+  return path.join(app.getPath('userData'), 'data');
+}
 
-  backendProcess = spawn(binPath, [], {
-    env,
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
+async function startBackend() {
+  try {
+    await startBackendServer({
+      host: BACKEND_HOST,
+      port: BACKEND_PORT,
+      dataDir: backendDataDir(),
+    });
+  } catch (err) {
+    console.error('[backend] failed to start:', err);
+  }
+}
 
-  backendProcess.stdout?.on('data', (data: Buffer) => {
-    console.log(`[backend] ${data.toString().trim()}`);
-  });
+async function stopBackend() {
+  try {
+    await stopBackendServer();
+  } catch (err) {
+    console.error('[backend] failed to stop:', err);
+  }
+}
 
-  backendProcess.stderr?.on('data', (data: Buffer) => {
-    console.error(`[backend] ${data.toString().trim()}`);
-  });
+function createTray() {
+  if (!trayMode) return;
+  if (tray) return;
 
-  backendProcess.on('exit', (code) => {
-    console.log(`[backend] exited with code ${code}`);
-    backendProcess = null;
-  });
+  const iconPath = path.join(__dirname, isDev ? '../public/icon.png' : '../dist/icon.png');
+  let icon: Electron.NativeImage;
+  try {
+    icon = nativeImage.createFromPath(iconPath);
+    if (icon.isEmpty()) throw new Error('empty icon');
+  } catch {
+    icon = nativeImage.createEmpty();
+  }
+  tray = new Tray(icon);
+  tray.setToolTip('68HUB');
 
-  backendProcess.on('error', (err) => {
-    console.error(`[backend] error: ${err.message}`);
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: '显示窗口',
+      click: () => {
+        mainWindow?.show();
+        mainWindow?.focus();
+      },
+    },
+    { type: 'separator' },
+    {
+      label: '退出',
+      click: () => {
+        trayMode = false;
+        app.quit();
+      },
+    },
+  ]);
+  tray.setContextMenu(contextMenu);
+
+  tray.on('double-click', () => {
+    mainWindow?.show();
+    mainWindow?.focus();
   });
 }
 
-function stopBackend() {
-  if (backendProcess && backendProcess.pid) {
-    killProcessTree(backendProcess.pid);
-    backendProcess = null;
+function destroyTray() {
+  if (tray) {
+    tray.destroy();
+    tray = null;
   }
 }
 
@@ -93,10 +140,16 @@ function createWindow() {
     }
   });
 
+  mainWindow.on('close', (event) => {
+    if (trayMode) {
+      event.preventDefault();
+      mainWindow?.hide();
+    }
+  });
+
   if (isDev) {
     mainWindow.loadURL('http://localhost:5173');
   } else {
-    startBackend();
     mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
   }
 }
@@ -112,7 +165,29 @@ ipcMain.on('window-maximize', () => {
     mainWindow?.maximize();
   }
 });
-ipcMain.on('window-close', () => mainWindow?.close());
+ipcMain.handle('window-close', async () => {
+  if (trayMode) {
+    mainWindow?.hide();
+    return 'hide';
+  }
+  if (!trayConfigured) {
+    return 'ask';
+  }
+  mainWindow?.close();
+  return 'quit';
+});
+
+ipcMain.handle('close-confirm', async (_event, action: string) => {
+  if (action === 'hide') {
+    saveTrayPreference(true, true);
+    createTray();
+    mainWindow?.hide();
+    return 'hide';
+  }
+  saveTrayPreference(false, true);
+  mainWindow?.close();
+  return 'quit';
+});
 
 ipcMain.handle('window-is-maximized', () => mainWindow?.isMaximized() ?? false);
 
@@ -120,37 +195,59 @@ ipcMain.handle('open-external', (_event, url: string) => {
   shell.openExternal(url);
 });
 
-ipcMain.handle('restart-backend', () => {
-  stopBackend();
-  startBackend();
+ipcMain.handle('restart-backend', async () => {
+  await restartBackendServer({
+    host: BACKEND_HOST,
+    port: BACKEND_PORT,
+    dataDir: backendDataDir(),
+  });
   return true;
 });
 
 ipcMain.handle('backend-pid', () => {
-  return backendProcess?.pid ?? null;
+  return isBackendRunning() ? process.pid : null;
 });
 
-app.whenReady().then(() => {
+ipcMain.handle('get-tray-mode', () => trayMode);
+
+ipcMain.handle('set-tray-mode', (_event, v: boolean) => {
+  saveTrayPreference(v, true);
+  if (v) {
+    createTray();
+  } else {
+    destroyTray();
+  }
+  return true;
+});
+
+app.whenReady().then(async () => {
+  loadTrayPreference();
+  await startBackend();
   createWindow();
+  if (trayMode) createTray();
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
+    } else {
+      mainWindow?.show();
     }
   });
 });
 
 app.on('window-all-closed', () => {
-  stopBackend();
+  void stopBackend();
   if (process.platform !== 'darwin') {
     app.quit();
   }
 });
 
 app.on('before-quit', () => {
-  stopBackend();
+  void stopBackend();
+  destroyTray();
 });
 
 app.on('will-quit', () => {
-  stopBackend();
+  void stopBackend();
+  destroyTray();
 });

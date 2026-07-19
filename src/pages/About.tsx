@@ -7,11 +7,12 @@ function openLink(url: string) {
 }
 
 export function About() {
+  const version = '1.1.0';
   return (
     <div className="max-w-4xl space-y-6">
       <div>
         <h1 className="text-lg font-bold">关于 68HUB</h1>
-        <p className="text-xs text-base-content/40 mt-1">OpenCode Go 用量统计面板</p>
+        <p className="text-xs text-base-content/40 mt-1">v{version} · OpenCode Go 用量统计面板</p>
       </div>
 
       <div className="border border-base-200 rounded-xl p-4 space-y-3">
@@ -54,7 +55,7 @@ export function About() {
       <div className="border border-base-200 rounded-xl p-4 space-y-2">
         <h2 className="text-sm font-bold text-base-content/70">技术栈</h2>
         <div className="flex flex-wrap gap-2">
-          {['Electron', 'React', 'TypeScript', 'Vite', 'Tailwind CSS', 'daisyUI', 'Recharts', 'FastAPI', 'SQLite'].map((t) => (
+          {['Electron', 'React', 'TypeScript', 'Vite', 'Tailwind CSS', 'daisyUI', 'Recharts', 'Hono', 'SQLite'].map((t) => (
             <span key={t} className="text-xs px-2 py-1 rounded-md bg-base-200 text-base-content/60 font-medium">{t}</span>
           ))}
         </div>
@@ -63,7 +64,7 @@ export function About() {
       <div className="border border-base-200 rounded-xl p-4 space-y-2">
         <h2 className="text-sm font-bold text-base-content/70">致谢</h2>
         <p className="text-sm text-base-content/60 leading-relaxed">
-          后端基于 <span className="text-primary cursor-pointer" onClick={() => openLink('https://github.com/lvmiao233/QuotaHub')}>QuotaHub</span> 的 FastAPI + SQLite 架构开发，感谢原作者的开源工作。
+          后端灵感来自 <span className="text-primary cursor-pointer" onClick={() => openLink('https://github.com/lvmiao233/QuotaHub')}>QuotaHub</span>，已重写为 Hono + better-sqlite3 内嵌于 Electron 主进程，告别双进程打包。
         </p>
       </div>
 

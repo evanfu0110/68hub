@@ -13,6 +13,7 @@ const map: [RegExp, string][] = [
   [/cohere|command/i, 'cohere'],
   [/yi-/i, '01'],
   [/phi/i, 'microsoft'],
+  [/grok/i, '__fallback__x.ai'],
 ];
 
 function matchIcon(model: string): string | null {

@@ -2,6 +2,7 @@ import { useLocation } from 'react-router-dom';
 import { Outlet } from 'react-router-dom';
 import { TitleBar } from './TitleBar';
 import { Sidebar } from './Sidebar';
+import { OnboardingDialog } from './OnboardingDialog';
 
 export function Layout() {
   const location = useLocation();
@@ -17,6 +18,7 @@ export function Layout() {
           </div>
         </main>
       </div>
+      <OnboardingDialog />
     </div>
   );
 }

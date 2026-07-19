@@ -3,6 +3,7 @@ import { usePolling } from '../hooks/usePolling';
 import { api } from '../api/client';
 import { SyncProgressBar } from '../components/SyncProgress';
 import { useToast } from '../components/Toast';
+import { useTheme } from '../components/ThemeProvider';
 import type { OpenCodeAccount } from '../api/types';
 
 function BackendStatus() {
@@ -82,9 +83,28 @@ export function Settings() {
   const [autoSync, setAutoSync] = useState(true);
   const [syncInterval, setSyncInterval] = useState(300);
   const [backfillPages, setBackfillPages] = useState(100);
+  const [trayMode, setTrayMode] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<OpenCodeAccount | null>(null);
   const addModal = useRef<HTMLDialogElement>(null);
   const deleteModal = useRef<HTMLDialogElement>(null);
+  const { theme, setTheme } = useTheme();
+
+  useEffect(() => {
+    (async () => {
+      if (window.electronAPI?.getTrayMode) {
+        const t = await window.electronAPI.getTrayMode();
+        setTrayMode(t);
+      }
+    })();
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.enabled !== undefined) {
+        setTrayMode(detail.enabled);
+      }
+    };
+    window.addEventListener('tray-mode-changed', handler);
+    return () => window.removeEventListener('tray-mode-changed', handler);
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -236,13 +256,73 @@ export function Settings() {
     }
   };
 
+  const handleTrayChange = async (v: boolean) => {
+    setTrayMode(v);
+    if (window.electronAPI?.setTrayMode) {
+      await window.electronAPI.setTrayMode(v);
+    }
+    if (v) {
+      toast('已开启最小化到托盘，关闭窗口时将隐藏到系统托盘', 'success');
+    } else {
+      toast('已关闭托盘模式', 'success');
+    }
+  };
+
+  const themeLabel: Record<string, string> = {
+    light: '浅色',
+    dark: '深色',
+    system: '跟随系统',
+  };
+
   return (
     <div className="space-y-6 max-w-4xl">
       <div>
         <h1 className="text-lg font-bold text-base-content">设置</h1>
-        <p className="text-xs text-base-content/40 mt-1">管理 OpenCode Go 账户和数据同步</p>
+        <p className="text-xs text-base-content/40 mt-1">管理 OpenCode Go 账户、外观和系统行为</p>
       </div>
 
+      {/* -- 外观 -- */}
+      <div className="border border-base-200 rounded-xl p-4">
+        <h2 className="text-sm font-bold text-base-content/70 mb-4">外观</h2>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-sm text-base-content/70">主题</div>
+              <div className="text-[11px] text-base-content/40 mt-0.5">选择界面主题，支持跟随系统</div>
+            </div>
+            <div className="flex gap-2">
+              {(['light', 'dark', 'system'] as const).map((t) => (
+                <button
+                  key={t}
+                  className={`btn btn-sm ${theme === t ? 'btn-primary' : 'btn-ghost'}`}
+                  onClick={() => setTheme(t)}
+                >
+                  {themeLabel[t]}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* -- 系统 -- */}
+      <div className="border border-base-200 rounded-xl p-4">
+        <h2 className="text-sm font-bold text-base-content/70 mb-4">系统</h2>
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="text-sm text-base-content/70">最小化到系统托盘</div>
+            <div className="text-[11px] text-base-content/40 mt-0.5">关闭窗口时隐藏到托盘，而非退出</div>
+          </div>
+          <input
+            type="checkbox"
+            className="toggle toggle-sm"
+            checked={trayMode}
+            onChange={(e) => handleTrayChange(e.target.checked)}
+          />
+        </div>
+      </div>
+
+      {/* -- 账户 -- */}
       <div className="border border-base-200 rounded-xl p-4">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-bold text-base-content/70">OpenCode 账户</h2>
@@ -310,6 +390,7 @@ export function Settings() {
         )}
       </div>
 
+      {/* -- 自动同步 -- */}
       <div className="border border-base-200 rounded-xl p-4">
         <h2 className="text-sm font-bold text-base-content/70 mb-4">自动同步</h2>
         <div className="space-y-4">
@@ -349,6 +430,7 @@ export function Settings() {
         </div>
       </div>
 
+      {/* -- 历史回填 -- */}
       <div className="border border-base-200 rounded-xl p-4">
         <h2 className="text-sm font-bold text-base-content/70 mb-4">历史回填</h2>
         <div className="space-y-4">
@@ -410,6 +492,40 @@ export function Settings() {
             </p>
           </div>
         </div>
+      </div>
+
+      {/* -- 恢复默认 -- */}
+      <div className="border border-base-200 rounded-xl p-4">
+        <h2 className="text-sm font-bold text-base-content/70 mb-4">恢复默认</h2>
+        <p className="text-xs text-base-content/40 mb-3">将同步设置、刷新设置等恢复为初始值，账户数据不受影响。</p>
+        <button
+          className="btn btn-outline btn-sm"
+          onClick={async () => {
+            try {
+              await api.updateConfig({
+                usage_sync: {
+                  auto_sync: true,
+                  interval_sec: 300,
+                  backfill_pages_per_request: 100,
+                  max_pages_per_incremental: 30,
+                },
+                refresh: {
+                  opencode_go: { auto_refresh: true, interval_sec: 60 },
+                  ollama: { auto_refresh: true, interval_sec: 300 },
+                },
+              });
+              setAutoSync(true);
+              setSyncInterval(300);
+              setBackfillPages(100);
+              toast('已恢复默认设置', 'success');
+              refetch();
+            } catch (e) {
+              toast('恢复失败: ' + (e as Error).message, 'error');
+            }
+          }}
+        >
+          恢复默认设置
+        </button>
       </div>
 
       <dialog ref={addModal} className="modal">

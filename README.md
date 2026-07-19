@@ -15,17 +15,15 @@
   <img src="https://img.shields.io/badge/daisyUI-5A0EF8?logo=daisyui&logoColor=white" />
   <img src="https://img.shields.io/badge/Recharts-22B5BF?logo=recharts&logoColor=white" />
   <br/>
-  <img src="https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white" />
-  <img src="https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white" />
+  <img src="https://img.shields.io/badge/Hono-E36002?logo=hono&logoColor=white" />
   <img src="https://img.shields.io/badge/SQLite-003B57?logo=sqlite&logoColor=white" />
-  <img src="https://img.shields.io/badge/PyInstaller-1F7C2C?logo=python&logoColor=white" />
   <img src="https://img.shields.io/badge/Windows-0078D4?logo=windows&logoColor=white" />
   <img src="https://img.shields.io/badge/License-MIT-yellow" />
 </p>
 
 <p align="center">
   <a href="https://github.com/evanfu0110/68hub/releases">
-    <img src="https://img.shields.io/badge/下载-v1.0.0-4FC08D?logo=download&style=for-the-badge" />
+    <img src="https://img.shields.io/badge/下载-v1.1.0-4FC08D?logo=download&style=for-the-badge" />
   </a>
 </p>
 
@@ -37,8 +35,6 @@
 | 2. Token 统计 | ![Token 统计](Preview%20Photo/2.png) |
 | 3. 每日趋势 | ![每日趋势](Preview%20Photo/3.png) |
 | 5. 设置 | ![设置](Preview%20Photo/5.png) |
-
-
 
 ## 功能
 
@@ -54,46 +50,56 @@
 ## 快速开始
 
 ```bash
-# 启动后端
-cd cola/backend && uv run uvicorn app.main:app --port 8788
+# 安装依赖
+pnpm install
 
-# 启动前端开发
-pnpm dev:vite    # 浏览器预览 http://localhost:5173
-
-# 或启动 Electron 窗口
+# 以开发者模式运行（自动启动后端 + Vite + Electron）
 pnpm dev
+
+# 单独启动 Vite 前端（需先拉起后端或 mock）
+pnpm dev:vite
 ```
+
+> 内嵌后端随 Electron 主进程自动启动（Hono + better-sqlite3），无需单独启动 Python 服务。
 
 ## 打包
 
 ```bash
-pip install pyinstaller
-scripts\build-backend.bat
 pnpm dist
 ```
 
-产物：`release\68HUB Setup 1.0.0.exe`
+产物：`release\68HUB Setup 1.1.0.exe`
 
 ## 技术栈
 
 | 前端 | 后端 | 工具 |
 |------|------|------|
-| Electron 31 | Python 3.11+ | electron-builder |
-| React 18 | FastAPI | PyInstaller |
-| TypeScript | SQLite | Windows x64 |
-| Vite 5 + Tailwind 4 | httpx + uvicorn | |
-| daisyUI 5 + Recharts | uv | |
+| Electron 31 | Hono + better-sqlite3 | electron-builder |
+| React 18 | TypeScript | Windows x64 |
+| Vite 5 + Tailwind 4 | zod | |
+| daisyUI 5 + Recharts | fetch (Node) | |
 
 ## 项目结构
 
 ```
 68HUB/
-├── electron/           # Electron 主进程 (main.ts + preload.ts)
-├── src/                # React 前端 (api / components / pages / hooks)
-├── cola/backend/       # Python 后端 (FastAPI + SQLite)
-├── public/             # 静态资源
-├── scripts/            # 构建脚本
-└── build/              # 图标 (自动生成)
+├── electron/
+│   ├── main.ts            # Electron 主进程 + 内嵌后端启动
+│   ├── preload.ts         # IPC 桥接
+│   └── backend/           # Node 后端 (Hono + better-sqlite3)
+│       ├── server.ts      # HTTP 服务生命周期 + auto-sync
+│       ├── routes.ts      # 全部 API 路由
+│       ├── db.ts          # SQLite CRUD
+│       ├── config.ts      # 配置/脱敏
+│       ├── quota.ts       # OpenCode 额度爬虫
+│       ├── ollama-quota.ts # Ollama 额度爬虫
+│       ├── opencode-usage.ts # 用量记录爬虫
+│       ├── usage-sync.ts  # 增量/回填同步
+│       ├── analytics.ts   # 概览聚合
+│       └── ...
+├── src/                   # React 前端 (api / components / pages / hooks)
+├── public/                # 静态资源
+└── build/                 # 图标 (自动生成)
 ```
 
 ## 多账户支持
@@ -104,7 +110,8 @@ pnpm dist
 
 ## 致谢
 
-后端基于 [QuotaHub](https://github.com/lvmiao233/QuotaHub) 的 FastAPI + SQLite 架构开发，感谢原作者的开源工作。
+- [QuotaHub](https://github.com/lvmiao233/QuotaHub) — 后端架构灵感来源
+- [OpenCode](https://opencode.ai) — 提供 API
 
 ## 联系方式
 

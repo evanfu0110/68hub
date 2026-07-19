@@ -1,40 +1,53 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
+# Dependencies
 node_modules
+.pnpm-store
+
+# Build outputs
 dist
 dist-electron
 release
+out
+
+# Local env files
 *.local
+.env
+.env.local
 
-# Python cache
-__pycache__/
-*.pyc
+# OS
+.DS_Store
+Thumbs.db
 
-# Backend data & build artifacts
-cola/data/
-cola/backend/dist/
-cola/backend/build/
-cola/backend/*.spec
-cola/backend/.venv/
-
-# opencode skill files
-.agents/
-skills-lock.json
-
-# Editor directories and files
+# Editors
 .vscode/*
 !.vscode/extensions.json
 .idea
-.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Python (legacy backend - removed in v1.1)
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+*.spec
+uv.lock
+
+# Backend data (persisted in userData at runtime)
+data/
+68backend.db
+config.json
+service.json
+
+# opencode skill files
+.agents/
+skills-lock.json

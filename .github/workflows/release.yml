@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Version tag (e.g. v1.0.0)"
+        description: "Version tag (e.g. v1.1.0)"
         required: true
         type: string
 
@@ -33,33 +33,14 @@ jobs:
           node-version: 22
           cache: pnpm
 
-      - name: Install frontend dependencies
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Install backend dependencies
-        working-directory: cola/backend
-        run: |
-          pip install -e .
-          pip install pyinstaller
 
       - name: Build frontend + Electron
         run: pnpm build
 
-      - name: Build backend (PyInstaller)
-        working-directory: cola/backend
-        shell: cmd
-        run: pyinstaller --onefile --clean --name 68backend --add-data "app;app" --hidden-import uvicorn --hidden-import uvicorn.server --hidden-import uvicorn.logging --hidden-import uvicorn.loops.auto --hidden-import uvicorn.loops.asyncio --hidden-import uvicorn.protocols.http.auto --hidden-import uvicorn.protocols.http.h11_impl --hidden-import uvicorn.protocols.websockets.auto --hidden-import uvicorn.middleware.proxy_headers --hidden-import fastapi --hidden-import fastapi.routing --hidden-import starlette --hidden-import starlette.applications --hidden-import starlette.routing --hidden-import starlette.middleware --hidden-import starlette.middleware.cors --hidden-import starlette.staticfiles --hidden-import starlette.responses --hidden-import httpx --hidden-import hpack --hidden-import httpx._transports.default --hidden-import httpcore --hidden-import httpcore._async --hidden-import httpcore._sync --hidden-import pydantic --hidden-import pydantic._internal --hidden-import pydantic.deprecated.decorator --hidden-import pydantic.v1 --hidden-import anyio --hidden-import anyio.streams --hidden-import sniffio --hidden-import certifi --hidden-import multidict --hidden-import h11 --hidden-import wsproto run.py
-
-      - name: Copy backend to dist-electron
-        shell: pwsh
-        run: |
-          if (-not (Test-Path dist-electron/backend)) { New-Item -ItemType Directory -Path dist-electron/backend -Force }
-          Copy-Item cola/backend/dist/68backend.exe dist-electron/backend/68backend.exe -Force
+      - name: Rebuild native modules for Electron
+        run: npx electron-rebuild -f -w better-sqlite3
 
       - name: Package with electron-builder
         run: npx --yes electron-builder@25 --win --publish never
@@ -72,6 +53,7 @@ jobs:
         run: |
           $hash = (Get-FileHash -Path "release\68HUB Setup *.exe" -Algorithm MD5).Hash.ToLower()
           echo "md5=$hash" >> $env:GITHUB_OUTPUT
+          echo "file=68HUB Setup $((Get-Item release\68HUB Setup*.exe).Name)" >> $env:GITHUB_OUTPUT
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
@@ -83,6 +65,17 @@ jobs:
 
             OpenCode Go 平价 Coding Plan 用量统计桌面应用。
 
+            ### 更新内容
+            - 后端从 Python (FastAPI + PyInstaller) 迁移至 Node.js (Hono + better-sqlite3)，内嵌于 Electron 主进程
+            - 单进程单安装包，告别双进程打包
+            - 暗色模式：支持浅色/深色/跟随系统三种主题（Forest 暗色主题）
+            - 系统托盘：关闭窗口时可最小化到托盘，后台继续同步
+            - 首次启动引导：选择主题偏好与托盘行为
+            - 设置页新增恢复默认设置按钮
+            - 支持 Grok 模型图标显示
+            - 关闭弹窗改为应用内 Modal，与主题风格一致
+            - 修复与优化详见提交记录
+
             ### 功能
             - 📊 用量统计总览：账户配额、Token 消耗一目了然
             - 📈 各模型 Token 消耗排行与每日趋势
@@ -91,6 +84,6 @@ jobs:
             - ⚙️ 多账户管理与自动同步
 
             ### 文件校验
-            - `68HUB Setup *.exe` → MD5: `${{ steps.md5.outputs.md5 }}`
+            - `${{ steps.md5.outputs.file }}` → MD5: `${{ steps.md5.outputs.md5 }}`
           files: |
             release/68HUB Setup *.exe

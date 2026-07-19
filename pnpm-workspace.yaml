@@ -1,5 +1,7 @@
 allowBuilds:
+  better-sqlite3: true
   electron: true
   esbuild: true
+  lzma-native: true
 minimumReleaseAgeExclude:
   - daisyui@5.6.17
