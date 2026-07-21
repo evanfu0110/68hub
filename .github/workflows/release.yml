@@ -26,18 +26,6 @@ jobs:
             builder-flags: --win --x64
             artifact-name: 68HUB-win-x64
             ext: .exe
-          - os: windows-latest
-            arch: ia32
-            platform: win
-            builder-flags: --win --ia32
-            artifact-name: 68HUB-win-ia32
-            ext: .exe
-          - os: macos-13
-            arch: x64
-            platform: mac
-            builder-flags: --mac --x64
-            artifact-name: 68HUB-mac-x64
-            ext: .dmg
           - os: macos-latest
             arch: arm64
             platform: mac

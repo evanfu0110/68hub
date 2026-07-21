@@ -38,13 +38,13 @@
     "win": {
       "icon": "public/icon.png",
       "target": [
-        { "target": "nsis", "arch": ["x64", "ia32"] }
+        { "target": "nsis", "arch": ["x64"] }
       ]
     },
     "mac": {
       "icon": "public/icon.png",
       "target": [
-        { "target": "dmg", "arch": ["x64", "arm64"] }
+        { "target": "dmg", "arch": ["arm64"] }
       ]
     },
     "linux": {
