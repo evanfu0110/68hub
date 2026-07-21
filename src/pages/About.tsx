@@ -1,3 +1,6 @@
+import { useTranslation } from 'react-i18next';
+import { useState, useEffect } from 'react';
+
 function openLink(url: string) {
   if (window.electronAPI?.openExternal) {
     window.electronAPI.openExternal(url);
@@ -6,54 +9,99 @@ function openLink(url: string) {
   }
 }
 
+function cmpVersion(a: string, b: string): number {
+  const pa = a.split('.').map(Number);
+  const pb = b.split('.').map(Number);
+  for (let i = 0; i < 3; i++) {
+    if ((pa[i] || 0) > (pb[i] || 0)) return 1;
+    if ((pa[i] || 0) < (pb[i] || 0)) return -1;
+  }
+  return 0;
+}
+
 export function About() {
-  const version = '1.1.0';
+  const { t } = useTranslation();
+  const [version, setVersion] = useState('1.1.1');
+  const [latestVersion, setLatestVersion] = useState<string | null>(null);
+  const [checkStatus, setCheckStatus] = useState<'checking' | 'latest' | 'outdated' | 'dev' | 'error'>('checking');
+
+  useEffect(() => {
+    (async () => {
+      let currentVersion = version;
+      if (window.electronAPI?.getVersion) {
+        currentVersion = await window.electronAPI.getVersion();
+        setVersion(currentVersion);
+      }
+      try {
+        const res = await fetch('https://api.github.com/repos/evanfu0110/68hub/tags');
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          const tag = data[0].name.replace(/^v/, '');
+          setLatestVersion(tag);
+          const cur = currentVersion.replace(/^v/, '');
+          const cmp = cmpVersion(cur, tag);
+          setCheckStatus(cmp === 0 ? 'latest' : cmp > 0 ? 'dev' : 'outdated');
+        } else {
+          setCheckStatus('error');
+        }
+      } catch {
+        setCheckStatus('error');
+      }
+    })();
+  }, []);
+
   return (
     <div className="max-w-4xl space-y-6">
       <div>
-        <h1 className="text-lg font-bold">关于 68HUB</h1>
-        <p className="text-xs text-base-content/40 mt-1">v{version} · OpenCode Go 用量统计面板</p>
+        <h1 className="text-lg font-bold">{t('about.title')}</h1>
+        <p className="text-xs text-base-content/40 mt-1">{t('about.version', { version })}</p>
+        <p className="text-xs mt-1">
+          {checkStatus === 'checking' && <span className="text-base-content/30">{t('about.checking')}</span>}
+          {checkStatus === 'latest' && <span className="text-success">{t('about.latest')}</span>}
+          {checkStatus === 'outdated' && <span className="text-warning">{t('about.newVersion', { version: latestVersion })}</span>}
+          {checkStatus === 'dev' && <span className="text-accent">{t('about.devBuild')}</span>}
+          {checkStatus === 'error' && <span className="text-error/60">{t('about.checkFailed')}</span>}
+        </p>
       </div>
 
       <div className="border border-base-200 rounded-xl p-4 space-y-3">
         <p className="text-sm text-base-content/70 leading-relaxed">
-          68HUB 是一个专为 <span className="font-semibold text-base-content">OpenCode Go</span> 平价 Coding Plan 设计的本地用量统计桌面应用。
+          {t('about.desc1')}
         </p>
         <p className="text-sm text-base-content/70 leading-relaxed">
-          OpenCode AI 官方的用量页面数据分散、操作繁琐，难以直观掌握各模型的 Token 消耗和账户配额状态。
-          68HUB 通过后端定时同步数据，以清晰的图表和布局展示关键指标，让你一目了然。
+          {t('about.desc2')}
         </p>
       </div>
 
       <button className="btn btn-primary w-full" onClick={() => openLink('https://github.com/evanfu0110/68hub/releases')}>
         <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        下载最新版本
+        {t('about.download')}
       </button>
 
       <div className="border border-base-200 rounded-xl p-4 space-y-3">
-        <h2 className="text-sm font-bold text-base-content/70">功能</h2>
+        <h2 className="text-sm font-bold text-base-content/70">{t('about.features')}</h2>
         <ul className="text-sm text-base-content/60 space-y-2">
           <li className="flex items-start gap-2">
             <span className="text-primary mt-0.5">-</span>
-            <span>多账户配额实时监控（5小时 / 7天 / 30天）</span>
+            <span>{t('about.feature1')}</span>
           </li>
           <li className="flex items-start gap-2">
             <span className="text-primary mt-0.5">-</span>
-            <span>各模型 Token 消耗排行与每日趋势</span>
+            <span>{t('about.feature2')}</span>
           </li>
           <li className="flex items-start gap-2">
             <span className="text-primary mt-0.5">-</span>
-            <span>详细使用记录查询与筛选</span>
+            <span>{t('about.feature3')}</span>
           </li>
           <li className="flex items-start gap-2">
             <span className="text-primary mt-0.5">-</span>
-            <span>自动同步数据，无需手动刷新</span>
+            <span>{t('about.feature4')}</span>
           </li>
         </ul>
       </div>
 
       <div className="border border-base-200 rounded-xl p-4 space-y-2">
-        <h2 className="text-sm font-bold text-base-content/70">技术栈</h2>
+        <h2 className="text-sm font-bold text-base-content/70">{t('about.techStack')}</h2>
         <div className="flex flex-wrap gap-2">
           {['Electron', 'React', 'TypeScript', 'Vite', 'Tailwind CSS', 'daisyUI', 'Recharts', 'Hono', 'SQLite'].map((t) => (
             <span key={t} className="text-xs px-2 py-1 rounded-md bg-base-200 text-base-content/60 font-medium">{t}</span>
@@ -62,14 +110,14 @@ export function About() {
       </div>
 
       <div className="border border-base-200 rounded-xl p-4 space-y-2">
-        <h2 className="text-sm font-bold text-base-content/70">致谢</h2>
+        <h2 className="text-sm font-bold text-base-content/70">{t('about.thanks')}</h2>
         <p className="text-sm text-base-content/60 leading-relaxed">
-          后端灵感来自 <span className="text-primary cursor-pointer" onClick={() => openLink('https://github.com/lvmiao233/QuotaHub')}>QuotaHub</span>，已重写为 Hono + better-sqlite3 内嵌于 Electron 主进程，告别双进程打包。
+          {t('about.thanksText')}
         </p>
       </div>
 
       <div className="border border-base-200 rounded-xl p-4 space-y-3">
-        <h2 className="text-sm font-bold text-base-content/70">联系方式</h2>
+        <h2 className="text-sm font-bold text-base-content/70">{t('about.contact')}</h2>
         <div className="text-sm text-base-content/60 space-y-2">
           <div className="flex items-center gap-2 cursor-pointer hover:text-primary transition-colors" onClick={() => openLink('mailto:1771005798@qq.com')}>
             <svg className="size-4 text-base-content/40 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -85,13 +133,13 @@ export function About() {
             </svg>
             <span>TG @Z6ix8ightBot</span>
           </div>
-          <div className="flex items-center gap-2 cursor-pointer hover:text-primary transition-colors" onClick={() => openLink('https://www.110.wtf')}>
+          <div className="flex items-center gap-2 cursor-pointer hover:text-primary transition-colors" onClick={() => openLink('https://68hub.110.wtf')}>
             <svg className="size-4 text-base-content/40 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <circle cx="12" cy="12" r="10" />
               <line x1="2" y1="12" x2="22" y2="12" />
               <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
             </svg>
-            <span>www.110.wtf</span>
+            <span>68hub.110.wtf</span>
           </div>
         </div>
       </div>
