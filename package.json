@@ -12,8 +12,8 @@
     "build:vite": "vite build",
     "build:electron": "tsc --project electron/tsconfig.json",
     "rebuild:native": "electron-rebuild -f -w better-sqlite3",
-    "dist": "pnpm build && pnpm rebuild:native && npx --yes electron-builder@25 --win",
-    "dist:dir": "pnpm build && pnpm rebuild:native && npx --yes electron-builder@25 --win --dir",
+    "dist": "pnpm build && pnpm rebuild:native && npx --yes electron-builder@25",
+    "dist:dir": "pnpm build && pnpm rebuild:native && npx --yes electron-builder@25 --dir",
     "postinstall": "pnpm build:electron",
     "preview": "vite preview",
     "electron": "electron ."
@@ -38,12 +38,19 @@
     "win": {
       "icon": "public/icon.png",
       "target": [
-        {
-          "target": "nsis",
-          "arch": [
-            "x64"
-          ]
-        }
+        { "target": "nsis", "arch": ["x64", "ia32"] }
+      ]
+    },
+    "mac": {
+      "icon": "public/icon.png",
+      "target": [
+        { "target": "dmg", "arch": ["x64", "arm64"] }
+      ]
+    },
+    "linux": {
+      "icon": "public/icon.png",
+      "target": [
+        { "target": "AppImage", "arch": ["x64"] }
       ]
     },
     "nsis": {

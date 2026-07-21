@@ -16,64 +16,102 @@ permissions:
 
 jobs:
   build:
-    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            arch: x64
+            platform: win
+            builder-flags: --win --x64
+            artifact-name: 68HUB-win-x64
+            ext: .exe
+          - os: windows-latest
+            arch: ia32
+            platform: win
+            builder-flags: --win --ia32
+            artifact-name: 68HUB-win-ia32
+            ext: .exe
+          - os: macos-13
+            arch: x64
+            platform: mac
+            builder-flags: --mac --x64
+            artifact-name: 68HUB-mac-x64
+            ext: .dmg
+          - os: macos-latest
+            arch: arm64
+            platform: mac
+            builder-flags: --mac --arm64
+            artifact-name: 68HUB-mac-arm64
+            ext: .dmg
+          - os: ubuntu-latest
+            arch: x64
+            platform: linux
+            builder-flags: --linux --x64
+            artifact-name: 68HUB-linux-x64
+            ext: .AppImage
+
+    runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4
         with:
           version: latest
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: pnpm
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile
 
-      - name: Build frontend + Electron
-        run: pnpm build
+      - run: pnpm build
 
-      - name: Rebuild native modules for Electron
-        run: npx electron-rebuild -f -w better-sqlite3
+      - name: Rebuild native modules
+        run: npx electron-rebuild -f -w better-sqlite3 ${{ matrix.arch != 'x64' && format('--arch {0}', matrix.arch) || '' }}
 
-      - name: Package with electron-builder
-        run: npx --yes electron-builder@25 --win --publish never
+      - name: Package
+        run: npx --yes electron-builder@25 ${{ matrix.builder-flags }} --publish never
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Generate MD5
-        id: md5
-        shell: pwsh
-        run: |
-          $exe = Get-ChildItem "release\68HUB Setup*.exe" | Select-Object -First 1
-          $hash = (Get-FileHash -Path $exe.FullName -Algorithm MD5).Hash.ToLower()
-          echo "md5=$hash" >> $env:GITHUB_OUTPUT
-          echo "file=$($exe.Name)" >> $env:GITHUB_OUTPUT
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: release/*${{ matrix.ext }}
 
-      - name: Generate Release Body
-        shell: pwsh
-        run: |
-          $changelog = Get-Content -Raw CHANGELOG.md
-          $body = @"
-$changelog
+  release:
+    needs: build
+    runs-on: ubuntu-latest
 
-### 文件校验 | File Verification
-- `${{ steps.md5.outputs.file }}` → MD5: `${{ steps.md5.outputs.md5 }}`
-"@
-          Set-Content -Path release_body.md -Value $body -Encoding utf8
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Generate checksums
+        run: find artifacts -type f -exec sha256sum {} \; > checksums.txt
+
+      - name: Determine tag
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "name=${{ inputs.tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "name=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          fi
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
-          name: ${{ github.ref_name }}
-          body_path: release_body.md
+          tag_name: ${{ steps.tag.outputs.name }}
+          name: ${{ steps.tag.outputs.name }}
+          body_path: CHANGELOG.md
           files: |
-            release/*.exe
-            CHANGELOG.md
+            artifacts/**/*
+            checksums.txt
