@@ -1,14 +1,18 @@
 import { memo } from 'react';
 import { NavLink } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
-const links = [
-  { to: '/', label: '总览', icon: 'grid' },
-  { to: '/tokens', label: 'Token', icon: 'bar-chart' },
-  { to: '/daily', label: '趋势', icon: 'trending-up' },
-  { to: '/records', label: '记录', icon: 'list' },
-  { to: '/settings', label: '设置', icon: 'settings' },
-  { to: '/about', label: '关于', icon: 'info' },
-];
+function useLinks() {
+  const { t } = useTranslation();
+  return [
+    { to: '/', label: t('nav.dashboard'), icon: 'grid' },
+    { to: '/tokens', label: t('nav.tokens'), icon: 'bar-chart' },
+    { to: '/daily', label: t('nav.daily'), icon: 'trending-up' },
+    { to: '/records', label: t('nav.records'), icon: 'list' },
+    { to: '/settings', label: t('nav.settings'), icon: 'settings' },
+    { to: '/about', label: t('nav.about'), icon: 'info' },
+  ];
+}
 
 const icons: Record<string, JSX.Element> = {
   grid: (
@@ -58,6 +62,7 @@ const icons: Record<string, JSX.Element> = {
 };
 
 function SidebarInner() {
+  const links = useLinks();
   return (
     <nav className="w-16 bg-base-200 border-r border-base-300 flex flex-col items-center py-4 gap-1 shrink-0">
       {links.map((link) => (

@@ -1,9 +1,11 @@
 import { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const win = window.electronAPI?.window;
 const api = window.electronAPI;
 
 export function TitleBar() {
+  const { t } = useTranslation();
   const [isMaximized, setIsMaximized] = useState(false);
   const [showCloseDialog, setShowCloseDialog] = useState(false);
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -48,7 +50,7 @@ export function TitleBar() {
         <div className="flex items-center ml-3 gap-2">
           <img src="logo.svg" className="h-[15px]" alt="68hub" />
           <span className="text-xs font-bold text-base-content/60 leading-4">68HUB</span>
-          <span className="text-[11px] text-base-content/30 leading-4">- OpenCode Go Manager</span>
+          <span className="text-[11px] text-base-content/30 leading-4">{t('app.subtitle')}</span>
         </div>
 
         <div className="flex-1" />
@@ -94,26 +96,26 @@ export function TitleBar() {
       {showCloseDialog && (
         <dialog ref={dialogRef} className="modal modal-open" onClose={() => setShowCloseDialog(false)}>
           <div className="modal-box max-w-sm">
-            <h3 className="font-semibold text-base mb-1">关闭窗口时...</h3>
-            <p className="text-xs text-base-content/50 mb-6">你可以将应用最小化到系统托盘，后台继续同步数据。</p>
+            <h3 className="font-semibold text-base mb-1">{t('titleBar.closeDialogTitle')}</h3>
+            <p className="text-xs text-base-content/50 mb-6">{t('titleBar.closeDialogDesc')}</p>
             <div className="flex flex-col gap-2">
               <button
                 className="btn btn-primary w-full"
                 onClick={() => handleCloseAction('hide')}
               >
-                最小化到托盘
+                {t('titleBar.minimizeToTray')}
               </button>
               <button
                 className="btn btn-ghost w-full"
                 onClick={() => handleCloseAction('quit')}
               >
-                退出应用
+                {t('titleBar.quitApp')}
               </button>
               <button
                 className="btn btn-ghost w-full text-base-content/50"
                 onClick={() => handleCloseAction('cancel')}
               >
-                取消
+                {t('common.cancel')}
               </button>
             </div>
           </div>

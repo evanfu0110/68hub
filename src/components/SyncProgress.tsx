@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 interface SyncProgressProps {
   status: string;
   current: number;
@@ -6,6 +8,7 @@ interface SyncProgressProps {
 }
 
 export function SyncProgressBar({ status, current, total }: SyncProgressProps) {
+  const { t } = useTranslation();
   if (status !== 'running' && status !== 'done') return null;
 
   const pct = total > 0 ? Math.min(Math.round((current / total) * 100), 100) : 0;
@@ -16,7 +19,7 @@ export function SyncProgressBar({ status, current, total }: SyncProgressProps) {
         <div className="h-1.5 bg-base-200 rounded-full overflow-hidden">
           <div className="h-full bg-success rounded-full" style={{ width: '100%' }} />
         </div>
-        <div className="text-[10px] text-success/60 text-center mt-0.5">完成</div>
+        <div className="text-[10px] text-success/60 text-center mt-0.5">{t('syncProgress.done')}</div>
       </div>
     );
   }
@@ -30,7 +33,7 @@ export function SyncProgressBar({ status, current, total }: SyncProgressProps) {
         />
       </div>
       <div className="text-[10px] text-base-content/40 text-center mt-0.5 tabular-nums">
-        {current > 0 ? `${current}/${total} 页` : '同步中...'}
+        {current > 0 ? t('syncProgress.pages', { current, total }) : t('syncProgress.syncing')}
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { usePolling } from '../hooks/usePolling';
 import { api } from '../api/client';
 import type { ModelTokenStat, OpenCodeAccount } from '../api/types';
@@ -7,6 +8,7 @@ import { ModelRankChart } from '../components/ModelRankChart';
 import { DailyModelChart } from '../components/DailyModelChart';
 
 export function TokenStats() {
+  const { t } = useTranslation();
   const [days, setDays] = useState(30);
   const [accountId, setAccountId] = useState('');
   const [tab, setTab] = useState<'ranking' | 'daily'>('ranking');
@@ -44,8 +46,8 @@ export function TokenStats() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-bold">Token 统计</h1>
-          <p className="text-xs text-base-content/40 mt-1">各模型 Token 使用量排行与每日趋势</p>
+          <h1 className="text-lg font-bold">{t('tokenStats.title')}</h1>
+          <p className="text-xs text-base-content/40 mt-1">{t('tokenStats.subtitle')}</p>
         </div>
         <div className="flex items-center gap-2">
           <select
@@ -53,7 +55,7 @@ export function TokenStats() {
             value={accountId}
             onChange={(e) => setAccountId(e.target.value)}
           >
-            <option value="">全部账户</option>
+            <option value="">{t('common.allAccounts')}</option>
             {(accounts ?? []).map((a: OpenCodeAccount) => (
               <option key={a.id} value={a.id}>{a.name}</option>
             ))}
@@ -63,20 +65,20 @@ export function TokenStats() {
             value={days}
             onChange={(e) => setDays(Number(e.target.value))}
           >
-            <option value={7}>7 天</option>
-            <option value={14}>14 天</option>
-            <option value={30}>30 天</option>
-            <option value={90}>90 天</option>
+            <option value={7}>{t('timeRange.7days')}</option>
+            <option value={14}>{t('timeRange.14days')}</option>
+            <option value={30}>{t('timeRange.30days')}</option>
+            <option value={90}>{t('timeRange.90days')}</option>
           </select>
         </div>
       </div>
 
       <div className="flex gap-4 text-sm">
         {[
-          { label: '总请求', value: totalRequests.toLocaleString() },
-          { label: '输入', value: formatTokens(totalInput) },
-          { label: '输出', value: formatTokens(totalOutput) },
-          { label: '总费用', value: `$${totalCost.toFixed(4)}` },
+          { label: t('tokenStats.totalRequests'), value: totalRequests.toLocaleString() },
+          { label: t('tokenStats.input'), value: formatTokens(totalInput) },
+          { label: t('tokenStats.output'), value: formatTokens(totalOutput) },
+          { label: t('tokenStats.totalCost'), value: `$${totalCost.toFixed(4)}` },
         ].map((item) => (
           <div key={item.label} className="border border-base-200 rounded-lg px-4 py-2.5 flex-1">
             <div className="text-[11px] font-bold text-base-content/40 uppercase">{item.label}</div>
@@ -90,13 +92,13 @@ export function TokenStats() {
           className={`tab tab-sm ${tab === 'ranking' ? 'tab-active' : ''}`}
           onClick={() => setTab('ranking')}
         >
-          模型排行
+          {t('tokenStats.modelRanking')}
         </button>
         <button
           className={`tab tab-sm ${tab === 'daily' ? 'tab-active' : ''}`}
           onClick={() => setTab('daily')}
         >
-          每日趋势
+          {t('tokenStats.dailyTrends')}
         </button>
       </div>
 
@@ -104,7 +106,7 @@ export function TokenStats() {
         <>
           <div className="border border-base-200 rounded-xl overflow-hidden">
             <div className="p-4">
-              <h3 className="text-xs font-bold text-base-content/50 uppercase mb-2">各模型 Token 使用量</h3>
+              <h3 className="text-xs font-bold text-base-content/50 uppercase mb-2">{t('tokenStats.modelUsage')}</h3>
               <ModelRankChart data={stats} />
             </div>
           </div>
@@ -114,19 +116,19 @@ export function TokenStats() {
               <table className="table table-sm">
                 <thead>
                   <tr className="text-base-content/40 text-xs uppercase tracking-wider">
-                    <th>模型</th>
-                    <th className="text-right">请求数</th>
-                    <th className="text-right">输入</th>
-                    <th className="text-right">输出</th>
-                    <th className="text-right">总 Tokens</th>
-                    <th className="text-right">费用</th>
+                    <th>{t('tokenStats.tableModel')}</th>
+                    <th className="text-right">{t('tokenStats.tableRequests')}</th>
+                    <th className="text-right">{t('tokenStats.tableInput')}</th>
+                    <th className="text-right">{t('tokenStats.tableOutput')}</th>
+                    <th className="text-right">{t('tokenStats.tableTotalTokens')}</th>
+                    <th className="text-right">{t('tokenStats.tableCost')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {stats.length === 0 ? (
                     <tr>
                       <td colSpan={6} className="text-center py-8 text-base-content/40 text-sm">
-                        暂无数据
+                        {t('common.noData')}
                       </td>
                     </tr>
                   ) : (
@@ -157,7 +159,7 @@ export function TokenStats() {
 
       {tab === 'daily' && (
         <div className="border border-base-200 rounded-xl p-4">
-          <h3 className="text-xs font-bold text-base-content/50 uppercase mb-2">每日各模型趋势</h3>
+          <h3 className="text-xs font-bold text-base-content/50 uppercase mb-2">{t('tokenStats.modelDailyTrends')}</h3>
           <DailyModelChart data={dailyStats} mode="cost" />
         </div>
       )}

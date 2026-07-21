@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { usePolling } from '../hooks/usePolling';
 import { api } from '../api/client';
 import { SyncProgressBar } from '../components/SyncProgress';
@@ -7,6 +8,7 @@ import { useTheme } from '../components/ThemeProvider';
 import type { OpenCodeAccount } from '../api/types';
 
 function BackendStatus() {
+  const { t } = useTranslation();
   const [status, setStatus] = useState<'checking' | 'online' | 'offline'>('checking');
   const [restarting, setRestarting] = useState(false);
 
@@ -40,27 +42,27 @@ function BackendStatus() {
   };
 
   const dotColor = status === 'online' ? 'bg-success' : status === 'offline' ? 'bg-error' : 'bg-warning';
-  const label = status === 'online' ? '运行中' : status === 'offline' ? '未连接' : '检测中...';
+  const label = status === 'online' ? t('settings.running') : status === 'offline' ? t('settings.disconnected') : t('settings.checking');
 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className={`w-2 h-2 rounded-full ${dotColor}`} />
-          <span className="text-sm text-base-content/70">状态</span>
+          <span className="text-sm text-base-content/70">{t('settings.backendStatus')}</span>
         </div>
         <span className="text-sm font-medium">{label}</span>
       </div>
       <div className="flex items-center justify-between">
-        <span className="text-sm text-base-content/70">地址</span>
+        <span className="text-sm text-base-content/70">{t('settings.backendAddress')}</span>
         <span className="text-sm text-base-content/50 font-mono">http://127.0.0.1:8788</span>
       </div>
       <div className="flex gap-2">
         <button className="btn btn-outline btn-sm" onClick={check}>
-          刷新状态
+          {t('settings.refreshStatus')}
         </button>
         <button className="btn btn-outline btn-sm" onClick={handleRestart} disabled={restarting}>
-          {restarting ? <span className="loading loading-spinner loading-xs" /> : '重启后端'}
+          {restarting ? <span className="loading loading-spinner loading-xs" /> : t('settings.restart')}
         </button>
       </div>
     </div>
@@ -68,6 +70,7 @@ function BackendStatus() {
 }
 
 export function Settings() {
+  const { t, i18n } = useTranslation();
   const { toast } = useToast();
   const { data: config, refetch } = usePolling(
     () => api.getConfig(),
@@ -88,6 +91,22 @@ export function Settings() {
   const addModal = useRef<HTMLDialogElement>(null);
   const deleteModal = useRef<HTMLDialogElement>(null);
   const { theme, setTheme } = useTheme();
+  const [language, setLanguageState] = useState<'zh' | 'en' | 'auto'>(() => {
+    const stored = localStorage.getItem('68hub-language');
+    if (stored === 'zh' || stored === 'en') return stored;
+    return 'auto';
+  });
+
+  const handleLanguageChange = (l: 'zh' | 'en' | 'auto') => {
+    setLanguageState(l);
+    if (l === 'auto') {
+      localStorage.removeItem('68hub-language');
+      const detected = navigator.language.startsWith('zh') ? 'zh' : 'en';
+      i18n.changeLanguage(detected);
+    } else {
+      i18n.changeLanguage(l);
+    }
+  };
 
   useEffect(() => {
     (async () => {
@@ -124,11 +143,11 @@ export function Settings() {
     setSaving(true);
     try {
       await api.createOpenCodeAccount(form);
-      toast('账户添加成功', 'success');
+      toast(t('settings.toastAccountAdded'), 'success');
       addModal.current?.close();
       refetch();
     } catch (e) {
-      toast('添加失败: ' + (e as Error).message, 'error');
+      toast(t('settings.toastAddFailed', { msg: (e as Error).message }), 'error');
     } finally {
       setSaving(false);
     }
@@ -142,12 +161,12 @@ export function Settings() {
           setSyncProg((prev) => ({ ...prev, [id]: p }));
         }
         if (p.status === 'done') {
-          toast(`同步完成! 新增 ${p.inserted} 条`, 'success');
+          toast(t('settings.toastSyncComplete', { count: p.inserted }), 'success');
           stopPollProgress(id);
           setSyncing(null);
           refetch();
         } else if (p.status === 'error' || p.status === 'timeout') {
-          toast('同步失败', 'error');
+          toast(t('settings.toastSyncFailed'), 'error');
           stopPollProgress(id);
           setSyncing(null);
         }
@@ -179,7 +198,7 @@ export function Settings() {
     } catch (e) {
       stopPollProgress(id);
       setSyncing(null);
-      toast('操作失败: ' + (e as Error).message, 'error');
+      toast(t('settings.toastOpFailed', { msg: (e as Error).message }), 'error');
     }
   };
 
@@ -188,13 +207,13 @@ export function Settings() {
     try {
       const result = await api.testOpenCodeAccount(id);
       if (result.success) {
-        toast('测试成功! workspace: ' + result.workspace_id, 'success');
+        toast(t('settings.toastTestSuccess', { id: result.workspace_id }), 'success');
       } else {
-        toast('测试失败: ' + (result.error || '未知错误'), 'error');
+        toast(t('settings.toastTestFailed', { msg: result.error || 'unknown' }), 'error');
       }
       refetch();
     } catch (e) {
-      toast('测试失败: ' + (e as Error).message, 'error');
+      toast(t('settings.toastTestFailed', { msg: (e as Error).message }), 'error');
     } finally {
       setTesting(null);
     }
@@ -209,10 +228,10 @@ export function Settings() {
     if (!deleteTarget) return;
     try {
       await api.deleteOpenCodeAccount(deleteTarget.id);
-      toast('账户已删除', 'success');
+      toast(t('settings.toastDeleted'), 'success');
       refetch();
     } catch (e) {
-      toast('删除失败: ' + (e as Error).message, 'error');
+      toast(t('settings.toastDeleteFailed', { msg: (e as Error).message }), 'error');
     } finally {
       setDeleteTarget(null);
     }
@@ -223,7 +242,7 @@ export function Settings() {
       await api.updateOpenCodeAccount(account.id, { enabled: !account.enabled });
       refetch();
     } catch (e) {
-      toast('更新失败: ' + (e as Error).message, 'error');
+      toast(t('settings.toastUpdateFailed', { msg: (e as Error).message }), 'error');
     }
   };
 
@@ -235,10 +254,10 @@ export function Settings() {
           interval_sec: syncInterval,
         },
       });
-      toast('同步设置已保存', 'success');
+      toast(t('settings.toastSyncSaved'), 'success');
       refetch();
     } catch (e) {
-      toast('保存失败: ' + (e as Error).message, 'error');
+      toast(t('settings.toastSyncSaveFailed', { msg: (e as Error).message }), 'error');
     }
   };
 
@@ -249,10 +268,10 @@ export function Settings() {
           backfill_pages_per_request: backfillPages,
         },
       });
-      toast('回填设置已保存', 'success');
+      toast(t('settings.toastBackfillSaved'), 'success');
       refetch();
     } catch (e) {
-      toast('保存失败: ' + (e as Error).message, 'error');
+      toast(t('settings.toastSyncSaveFailed', { msg: (e as Error).message }), 'error');
     }
   };
 
@@ -262,33 +281,57 @@ export function Settings() {
       await window.electronAPI.setTrayMode(v);
     }
     if (v) {
-      toast('已开启最小化到托盘，关闭窗口时将隐藏到系统托盘', 'success');
+      toast(t('settings.toastTrayOn'), 'success');
     } else {
-      toast('已关闭托盘模式', 'success');
+      toast(t('settings.toastTrayOff'), 'success');
     }
   };
 
   const themeLabel: Record<string, string> = {
-    light: '浅色',
-    dark: '深色',
-    system: '跟随系统',
+    light: t('settings.light'),
+    dark: t('settings.dark'),
+    system: t('settings.system'),
   };
 
   return (
     <div className="space-y-6 max-w-4xl">
       <div>
-        <h1 className="text-lg font-bold text-base-content">设置</h1>
-        <p className="text-xs text-base-content/40 mt-1">管理 OpenCode Go 账户、外观和系统行为</p>
+        <h1 className="text-lg font-bold text-base-content">{t('settings.title')}</h1>
+        <p className="text-xs text-base-content/40 mt-1">{t('settings.subtitle')}</p>
+      </div>
+
+      {/* -- 语言 -- */}
+      <div className="border border-base-200 rounded-xl p-4">
+        <h2 className="text-sm font-bold text-base-content/70 mb-4">{t('settings.language')}</h2>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-sm text-base-content/70">{t('settings.language')}</div>
+              <div className="text-[11px] text-base-content/40 mt-0.5">{t('settings.languageDesc')}</div>
+            </div>
+            <div className="flex gap-2">
+              {(['zh', 'en', 'auto'] as const).map((l) => (
+                <button
+                  key={l}
+                  className={`btn btn-sm ${language === l ? 'btn-primary' : 'btn-ghost'}`}
+                  onClick={() => handleLanguageChange(l)}
+                >
+                  {l === 'zh' ? t('settings.zh') : l === 'en' ? t('settings.en') : t('settings.languageAuto')}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* -- 外观 -- */}
       <div className="border border-base-200 rounded-xl p-4">
-        <h2 className="text-sm font-bold text-base-content/70 mb-4">外观</h2>
+        <h2 className="text-sm font-bold text-base-content/70 mb-4">{t('settings.appearance')}</h2>
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-sm text-base-content/70">主题</div>
-              <div className="text-[11px] text-base-content/40 mt-0.5">选择界面主题，支持跟随系统</div>
+              <div className="text-sm text-base-content/70">{t('settings.theme')}</div>
+              <div className="text-[11px] text-base-content/40 mt-0.5">{t('settings.themeDesc')}</div>
             </div>
             <div className="flex gap-2">
               {(['light', 'dark', 'system'] as const).map((t) => (
@@ -307,11 +350,11 @@ export function Settings() {
 
       {/* -- 系统 -- */}
       <div className="border border-base-200 rounded-xl p-4">
-        <h2 className="text-sm font-bold text-base-content/70 mb-4">系统</h2>
+        <h2 className="text-sm font-bold text-base-content/70 mb-4">{t('settings.systemSection')}</h2>
         <div className="flex items-center justify-between">
           <div>
-            <div className="text-sm text-base-content/70">最小化到系统托盘</div>
-            <div className="text-[11px] text-base-content/40 mt-0.5">关闭窗口时隐藏到托盘，而非退出</div>
+            <div className="text-sm text-base-content/70">{t('settings.tray')}</div>
+            <div className="text-[11px] text-base-content/40 mt-0.5">{t('settings.trayDesc')}</div>
           </div>
           <input
             type="checkbox"
@@ -325,15 +368,15 @@ export function Settings() {
       {/* -- 账户 -- */}
       <div className="border border-base-200 rounded-xl p-4">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-bold text-base-content/70">OpenCode 账户</h2>
+          <h2 className="text-sm font-bold text-base-content/70">{t('settings.accounts')}</h2>
           <button className="btn btn-primary btn-sm" onClick={openAdd}>
-            添加账户
+            {t('settings.addAccount')}
           </button>
         </div>
 
         {accounts.length === 0 ? (
           <div className="text-center py-6 text-base-content/50 text-sm">
-            暂无账户，点击"添加账户"开始
+            {t('settings.noAccounts')}
           </div>
         ) : (
           <div className="space-y-2">
@@ -358,7 +401,7 @@ export function Settings() {
                     className={`btn btn-xs btn-ghost ${account.enabled ? 'text-success' : 'text-base-content/40'}`}
                     onClick={() => handleToggle(account)}
                   >
-                    {account.enabled ? '已启用' : '已禁用'}
+                    {account.enabled ? t('settings.enabled') : t('settings.disabled')}
                   </button>
                   <button
                     className="btn btn-xs btn-ghost"
@@ -367,21 +410,21 @@ export function Settings() {
                   >
                     {testing === account.id
                       ? <span className="loading loading-spinner loading-xs" />
-                      : '测试'}
+                      : t('settings.test')}
                   </button>
                   {syncing === account.id && syncProg[account.id] ? (
                     <SyncProgressBar {...syncProg[account.id]} />
                   ) : (
                     <>
-                      <button className="btn btn-xs btn-ghost" onClick={() => doSync(account.id, 'sync')}>同步</button>
-                      <button className="btn btn-xs btn-ghost" onClick={() => doSync(account.id, 'backfill')}>回填</button>
+                      <button className="btn btn-xs btn-ghost" onClick={() => doSync(account.id, 'sync')}>{t('settings.sync')}</button>
+                      <button className="btn btn-xs btn-ghost" onClick={() => doSync(account.id, 'backfill')}>{t('settings.backfill')}</button>
                     </>
                   )}
                   <button
                     className="btn btn-xs btn-ghost text-error"
                     onClick={() => confirmDelete(account)}
                   >
-                    删除
+                    {t('settings.delete')}
                   </button>
                 </div>
               </div>
@@ -392,12 +435,12 @@ export function Settings() {
 
       {/* -- 自动同步 -- */}
       <div className="border border-base-200 rounded-xl p-4">
-        <h2 className="text-sm font-bold text-base-content/70 mb-4">自动同步</h2>
+        <h2 className="text-sm font-bold text-base-content/70 mb-4">{t('settings.autoSync')}</h2>
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-sm text-base-content/70">自动同步</div>
-              <div className="text-[11px] text-base-content/40 mt-0.5">定时拉取最新的使用记录</div>
+              <div className="text-sm text-base-content/70">{t('settings.autoSync')}</div>
+              <div className="text-[11px] text-base-content/40 mt-0.5">{t('settings.autoSyncDesc')}</div>
             </div>
             <input
               type="checkbox"
@@ -409,86 +452,82 @@ export function Settings() {
 
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-sm text-base-content/70">同步间隔</div>
-              <div className="text-[11px] text-base-content/40 mt-0.5">每次自动同步的时间间隔</div>
+              <div className="text-sm text-base-content/70">{t('settings.syncInterval')}</div>
+              <div className="text-[11px] text-base-content/40 mt-0.5">{t('settings.syncIntervalDesc')}</div>
             </div>
             <select
               className="select select-bordered select-sm w-28"
               value={syncInterval}
               onChange={(e) => setSyncInterval(Number(e.target.value))}
             >
-              <option value={60}>1 分钟</option>
-              <option value={300}>5 分钟</option>
-              <option value={600}>10 分钟</option>
-              <option value={1800}>30 分钟</option>
+              <option value={60}>{t('settings.min1')}</option>
+              <option value={300}>{t('settings.min5')}</option>
+              <option value={600}>{t('settings.min10')}</option>
+              <option value={1800}>{t('settings.min30')}</option>
             </select>
           </div>
 
           <button className="btn btn-primary btn-sm" onClick={saveSyncSettings}>
-            保存同步设置
+            {t('settings.saveSyncSettings')}
           </button>
         </div>
       </div>
 
       {/* -- 历史回填 -- */}
       <div className="border border-base-200 rounded-xl p-4">
-        <h2 className="text-sm font-bold text-base-content/70 mb-4">历史回填</h2>
+        <h2 className="text-sm font-bold text-base-content/70 mb-4">{t('settings.backfillSection')}</h2>
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-sm text-base-content/70">回填页数</div>
-              <div className="text-[11px] text-base-content/40 mt-0.5">每页 50 条，从最深的历史记录往前拉</div>
+              <div className="text-sm text-base-content/70">{t('settings.backfillPages')}</div>
+              <div className="text-[11px] text-base-content/40 mt-0.5">{t('settings.backfillDesc')}</div>
             </div>
             <select
               className="select select-bordered select-sm w-32"
               value={backfillPages}
               onChange={(e) => setBackfillPages(Number(e.target.value))}
             >
-              <option value={100}>100 页</option>
-              <option value={200}>200 页</option>
-              <option value={500}>500 页</option>
-              <option value={1000}>1000 页</option>
+              <option value={100}>{t('settings.pages100')}</option>
+              <option value={200}>{t('settings.pages200')}</option>
+              <option value={500}>{t('settings.pages500')}</option>
+              <option value={1000}>{t('settings.pages1000')}</option>
             </select>
           </div>
 
           <button className="btn btn-primary btn-sm" onClick={saveBackfillSettings}>
-            保存回填设置
+            {t('settings.saveBackfillSettings')}
           </button>
         </div>
       </div>
 
       <div className="border border-base-200 rounded-xl p-4" id="backend-status">
-        <h2 className="text-sm font-bold text-base-content/70 mb-4">后端服务</h2>
+        <h2 className="text-sm font-bold text-base-content/70 mb-4">{t('settings.backend')}</h2>
         <BackendStatus />
       </div>
 
       <div className="border border-base-200 rounded-xl p-4 space-y-3">
-        <h2 className="text-sm font-bold text-base-content/70">说明</h2>
+        <h2 className="text-sm font-bold text-base-content/70">{t('settings.explanation')}</h2>
 
         <div className="text-sm text-base-content/60 leading-relaxed space-y-3">
           <div>
-            <h3 className="text-sm font-semibold text-base-content mb-1">同步 vs 回填</h3>
+            <h3 className="text-sm font-semibold text-base-content mb-1">{t('settings.syncVsBackfill')}</h3>
             <p className="text-xs text-base-content/50">
-              <span className="font-medium text-base-content/70">同步</span> 是从当前位置往前翻，拉取最新的使用记录。启用自动同步后，后台会按设定的间隔自动执行。
-              点击账户旁的「同步」按钮可手动触发。
+              <span className="font-medium text-base-content/70">{t('settings.syncLabel')}</span> {t('settings.syncExplanation')}
             </p>
             <p className="text-xs text-base-content/50 mt-2">
-              <span className="font-medium text-base-content/70">回填</span> 是从已拉到的最深处继续往前翻，专门用来拉取历史数据。
-              新添加的账户需要先回填才能看到过去的记录。页数越大拉得越多。
+              <span className="font-medium text-base-content/70">{t('settings.backfillLabel')}</span> {t('settings.backfillExplanation')}
             </p>
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold text-base-content mb-1">新用户与老用户</h3>
+            <h3 className="text-sm font-semibold text-base-content mb-1">{t('settings.newVsOld')}</h3>
             <p className="text-xs text-base-content/50">
-              <span className="font-medium text-base-content/70">新 OpenCode Go 用户：</span>
-              添加账户后，点击「同步」拉取最近的记录即可使用。自动同步默认开启，后续数据会自动更新。
+              <span className="font-medium text-base-content/70">{t('settings.newUser')}</span>
+              {t('settings.newUserDesc')}
             </p>
             <p className="text-xs text-base-content/50 mt-2">
-              <span className="font-medium text-base-content/70">已使用 OpenCode Go 的用户：</span>
-              添加账户后，先点「同步」拉取最新数据，再点「回填」拉取历史记录。
-              建议先设置回填 500~1000 页，然后点击账户旁的「回填」按钮。
-              回填完成后，主页和统计页面就能看到完整数据。
+              <span className="font-medium text-base-content/70">{t('settings.oldUser')}</span>
+              {t('settings.oldUserDesc')}
             </p>
           </div>
         </div>
@@ -496,8 +535,8 @@ export function Settings() {
 
       {/* -- 恢复默认 -- */}
       <div className="border border-base-200 rounded-xl p-4">
-        <h2 className="text-sm font-bold text-base-content/70 mb-4">恢复默认</h2>
-        <p className="text-xs text-base-content/40 mb-3">将同步设置、刷新设置等恢复为初始值，账户数据不受影响。</p>
+        <h2 className="text-sm font-bold text-base-content/70 mb-4">{t('settings.resetDefaults')}</h2>
+        <p className="text-xs text-base-content/40 mb-3">{t('settings.resetDesc')}</p>
         <button
           className="btn btn-outline btn-sm"
           onClick={async () => {
@@ -517,60 +556,60 @@ export function Settings() {
               setAutoSync(true);
               setSyncInterval(300);
               setBackfillPages(100);
-              toast('已恢复默认设置', 'success');
+              toast(t('settings.toastResetDone'), 'success');
               refetch();
             } catch (e) {
-              toast('恢复失败: ' + (e as Error).message, 'error');
+              toast(t('settings.toastResetFailed', { msg: (e as Error).message }), 'error');
             }
           }}
         >
-          恢复默认设置
+          {t('settings.resetButton')}
         </button>
       </div>
 
       <dialog ref={addModal} className="modal">
         <div className="modal-box max-w-md">
-          <h3 className="font-semibold text-base mb-4">添加 OpenCode 账户</h3>
+          <h3 className="font-semibold text-base mb-4">{t('settings.addAccountDialog')}</h3>
           <div className="space-y-4">
             <div>
-              <label className="text-xs text-base-content/60 mb-1.5 block">名称</label>
+              <label className="text-xs text-base-content/60 mb-1.5 block">{t('settings.name')}</label>
               <input
                 type="text"
                 className="input-native"
-                placeholder="例如: 我的主账户"
+                placeholder={t('settings.namePlaceholder')}
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
               />
             </div>
             <div>
-              <label className="text-xs text-base-content/60 mb-1.5 block">Workspace ID</label>
+              <label className="text-xs text-base-content/60 mb-1.5 block">{t('settings.workspaceId')}</label>
               <input
                 type="text"
                 className="input-native"
-                placeholder="Default"
+                placeholder={t('settings.workspacePlaceholder')}
                 value={form.workspace_id}
                 onChange={(e) => setForm({ ...form, workspace_id: e.target.value })}
               />
             </div>
             <div>
-              <label className="text-xs text-base-content/60 mb-1.5 block">Auth Cookie</label>
+              <label className="text-xs text-base-content/60 mb-1.5 block">{t('settings.authCookie')}</label>
               <input
                 type="password"
                 className="input-native font-mono"
-                placeholder="粘贴 auth=xxx..."
+                placeholder={t('settings.cookiePlaceholder')}
                 value={form.auth_cookie}
                 onChange={(e) => setForm({ ...form, auth_cookie: e.target.value })}
               />
             </div>
           </div>
           <div className="modal-action">
-            <button className="btn btn-sm" onClick={() => addModal.current?.close()}>取消</button>
+            <button className="btn btn-sm" onClick={() => addModal.current?.close()}>{t('common.cancel')}</button>
             <button
               className="btn btn-primary btn-sm"
               onClick={handleAdd}
               disabled={saving || !form.name || !form.auth_cookie}
             >
-              {saving ? <span className="loading loading-spinner loading-xs" /> : '保存'}
+              {saving ? <span className="loading loading-spinner loading-xs" /> : t('common.save')}
             </button>
           </div>
         </div>
@@ -581,13 +620,13 @@ export function Settings() {
 
       <dialog ref={deleteModal} className="modal">
         <div className="modal-box max-w-sm">
-          <h3 className="font-semibold text-base mb-2">确认删除</h3>
+          <h3 className="font-semibold text-base mb-2">{t('settings.confirmDelete')}</h3>
           <p className="text-sm text-base-content/60">
-            确定要删除账户 <span className="font-medium text-base-content">{deleteTarget?.name}</span> 吗？相关使用记录也会一并删除。
+            {t('settings.confirmDeleteMsg', { name: deleteTarget?.name })}
           </p>
           <div className="modal-action">
-            <button className="btn btn-sm" onClick={() => { deleteModal.current?.close(); setDeleteTarget(null); }}>取消</button>
-            <button className="btn btn-sm btn-error" onClick={handleDelete}>删除</button>
+            <button className="btn btn-sm" onClick={() => { deleteModal.current?.close(); setDeleteTarget(null); }}>{t('common.cancel')}</button>
+            <button className="btn btn-sm btn-error" onClick={handleDelete}>{t('common.delete')}</button>
           </div>
         </div>
         <form method="dialog" className="modal-backdrop">

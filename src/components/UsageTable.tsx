@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { UsageRecord } from '../api/types';
 import { ModelIcon } from './ModelIcon';
 
@@ -16,9 +17,12 @@ function displayPlan(p: string | null) {
 }
 
 export function UsageTable({ records, showAccount }: UsageTableProps) {
+  const { t, i18n } = useTranslation();
+
   const formatTime = (iso: string) => {
     const d = new Date(iso);
-    return d.toLocaleString('zh-CN', {
+    const locale = i18n.language === 'zh' ? 'zh-CN' : 'en-US';
+    return d.toLocaleString(locale, {
       month: '2-digit',
       day: '2-digit',
       hour: '2-digit',
@@ -31,20 +35,20 @@ export function UsageTable({ records, showAccount }: UsageTableProps) {
       <table className="table table-sm">
         <thead>
           <tr className="text-base-content/40 text-xs uppercase tracking-wider">
-            {showAccount && <th>账户</th>}
-                <th>时间</th>
-                <th>模型</th>
-                <th className="text-right">输入</th>
-                <th className="text-right">输出</th>
-            <th className="text-right">费用</th>
-            <th>Plan</th>
+            {showAccount && <th>{t('common.account')}</th>}
+                <th>{t('common.time')}</th>
+                <th>{t('common.model')}</th>
+                <th className="text-right">{t('common.input')}</th>
+                <th className="text-right">{t('common.output')}</th>
+            <th className="text-right">{t('common.cost')}</th>
+            <th>{t('common.plan')}</th>
           </tr>
         </thead>
         <tbody>
           {records.length === 0 ? (
             <tr>
               <td colSpan={showAccount ? 7 : 6} className="text-center py-8 text-base-content/40 text-sm">
-                暂无使用记录
+                {t('common.noUsageRecords')}
               </td>
             </tr>
           ) : (

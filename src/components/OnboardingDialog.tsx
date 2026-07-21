@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from './ThemeProvider';
 
 const ONBOARDING_KEY = '68hub-onboarded';
 
 export function OnboardingDialog() {
+  const { t } = useTranslation();
   const [show, setShow] = useState(false);
   const { theme, setTheme } = useTheme();
   const [tray, setTray] = useState(true);
@@ -32,21 +34,20 @@ export function OnboardingDialog() {
   return (
     <dialog ref={ref} className="modal modal-open" onClose={() => {}}>
       <div className="modal-box max-w-md">
-        <h3 className="font-semibold text-base mb-1">欢迎使用 68HUB</h3>
-        <p className="text-xs text-base-content/50 mb-6">选择偏好的外观和系统行为</p>
+        <h3 className="font-semibold text-base mb-1">{t('onboarding.welcome')}</h3>
+        <p className="text-xs text-base-content/50 mb-6">{t('onboarding.subtitle')}</p>
 
         <div className="space-y-5">
-          {/* 主题 */}
           <div>
-            <div className="text-sm font-medium text-base-content/80 mb-2">界面主题</div>
+            <div className="text-sm font-medium text-base-content/80 mb-2">{t('onboarding.themeLabel')}</div>
             <div className="flex gap-2">
-              {(['light', 'dark', 'system'] as const).map((t) => {
-                const label = { light: '浅色', dark: '深色', system: '跟随系统' }[t];
+              {(['light', 'dark', 'system'] as const).map((m) => {
+                const label = { light: t('settings.light'), dark: t('settings.dark'), system: t('settings.system') }[m];
                 return (
                   <button
-                    key={t}
-                    className={`btn btn-sm flex-1 ${theme === t ? 'btn-primary' : 'btn-ghost'}`}
-                    onClick={() => setTheme(t)}
+                    key={m}
+                    className={`btn btn-sm flex-1 ${theme === m ? 'btn-primary' : 'btn-ghost'}`}
+                    onClick={() => setTheme(m)}
                   >
                     {label}
                   </button>
@@ -55,11 +56,10 @@ export function OnboardingDialog() {
             </div>
           </div>
 
-          {/* 托盘 */}
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-sm text-base-content/80">最小化到系统托盘</div>
-              <div className="text-[11px] text-base-content/40 mt-0.5">关闭窗口时隐藏到托盘，而非退出</div>
+              <div className="text-sm text-base-content/80">{t('onboarding.tray')}</div>
+              <div className="text-[11px] text-base-content/40 mt-0.5">{t('onboarding.trayDesc')}</div>
             </div>
             <input
               type="checkbox"
@@ -72,7 +72,7 @@ export function OnboardingDialog() {
 
         <div className="modal-action">
           <button className="btn btn-primary btn-sm" onClick={handleFinish}>
-            开始使用
+            {t('onboarding.start')}
           </button>
         </div>
       </div>

@@ -4,6 +4,7 @@
   </picture>
   <h1 align="center">68HUB</h1>
   <p align="center">OpenCode Go 平价 Coding Plan 用量统计桌面应用</p>
+  <p align="center"><a href="README_en.md">English</a></p>
 </p>
 
 <p align="center">
@@ -23,7 +24,7 @@
 
 <p align="center">
   <a href="https://github.com/evanfu0110/68hub/releases">
-    <img src="https://img.shields.io/badge/下载-v1.1.0-4FC08D?logo=download&style=for-the-badge" />
+    <img src="https://img.shields.io/badge/下载-v1.1.1-4FC08D?logo=download&style=for-the-badge" />
   </a>
 </p>
 
@@ -68,7 +69,7 @@ pnpm dev:vite
 pnpm dist
 ```
 
-产物：`release\68HUB Setup 1.1.0.exe`
+产物：`release\68HUB Setup 1.1.1.exe`
 
 ## 技术栈
 

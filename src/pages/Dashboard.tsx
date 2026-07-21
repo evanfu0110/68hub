@@ -1,12 +1,11 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { usePolling } from '../hooks/usePolling';
 import { api } from '../api/client';
 import { ModelIcon } from '../components/ModelIcon';
 import { UsageTable } from '../components/UsageTable';
 import type { QuotaWindow } from '../api/types';
-
-
 
 function fmt(v: number) {
   if (v >= 1_000_000) return (v / 1_000_000).toFixed(2) + 'M';
@@ -15,7 +14,7 @@ function fmt(v: number) {
 }
 
 function fmtTime(sec: number) {
-  if (sec <= 0) return '已重置';
+  if (sec <= 0) return '0';
   const h = Math.floor(sec / 3600);
   const m = Math.floor((sec % 3600) / 60);
   if (h > 0) return `${h}h ${m}m`;
@@ -27,13 +26,15 @@ const barColors: Record<string, string> = {
   Weekly: 'bg-secondary',
   Monthly: 'bg-accent',
 };
-const barLabels: Record<string, string> = {
-  '5h Rolling': '5小时',
-  Weekly: '7天',
-  Monthly: '30天',
+
+const barLabelKeys: Record<string, string> = {
+  '5h Rolling': 'dashboard.5h',
+  Weekly: 'dashboard.7d',
+  Monthly: 'dashboard.30d',
 };
 
 function QuotaBar({ windows }: { windows: QuotaWindow[] }) {
+  const { t, i18n } = useTranslation();
   return (
     <div className="space-y-3">
       {windows.map((w) => {
@@ -47,7 +48,7 @@ function QuotaBar({ windows }: { windows: QuotaWindow[] }) {
             <div className="flex items-center justify-between mb-1">
               <div className="flex items-center gap-2">
                 <div className={`w-2 h-2 rounded-full ${c}`} />
-                <span className="text-xs text-base-content/60">{barLabels[w.label] || w.label}</span>
+                <span className="text-xs text-base-content/60">{t(barLabelKeys[w.label] || w.label)}</span>
               </div>
               <span className="text-xs font-bold tabular-nums">{v}%</span>
             </div>
@@ -56,12 +57,12 @@ function QuotaBar({ windows }: { windows: QuotaWindow[] }) {
             </div>
             {w.label === '5h Rolling' && w.reset_in_sec > 0 && (
               <div className="text-[10px] text-base-content/30 mt-0.5">
-                重置倒计时 {fmtTime(w.reset_in_sec)}
+                {t('dashboard.countdown', { time: fmtTime(w.reset_in_sec) })}
               </div>
             )}
             {w.label !== '5h Rolling' && w.reset_at && (
               <div className="text-[10px] text-base-content/30 mt-0.5">
-                重置时间 {new Date(w.reset_at).toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                {t('dashboard.resetTime', { date: new Date(w.reset_at).toLocaleDateString(i18n.language === 'zh' ? 'zh-CN' : 'en-US') })}
               </div>
             )}
           </div>
@@ -74,6 +75,7 @@ function QuotaBar({ windows }: { windows: QuotaWindow[] }) {
 const DONUT_COLORS = ['oklch(0.6 0.15 200)', 'oklch(0.65 0.18 340)'];
 
 function ModelDonut({ models: raw }: { models: { model: string; total_input_tokens: number; total_output_tokens: number; total_cost_usd: number; request_count: number }[] }) {
+  const { t } = useTranslation();
   const top = [...raw]
     .sort((a, b) => (b.total_input_tokens + b.total_output_tokens) - (a.total_input_tokens + a.total_output_tokens))
     .slice(0, 3);
@@ -85,7 +87,7 @@ function ModelDonut({ models: raw }: { models: { model: string; total_input_toke
   const total = chartData[0].value + chartData[1].value;
 
   if (top.length === 0) {
-    return <div className="text-sm text-base-content/40 text-center py-10">暂无数据</div>;
+    return <div className="text-sm text-base-content/40 text-center py-10">{t('common.noData')}</div>;
   }
 
   return (
@@ -109,7 +111,7 @@ function ModelDonut({ models: raw }: { models: { model: string; total_input_toke
                 ))}
               </Pie>
               <Tooltip
-                formatter={(value) => [fmt(Number(value)), 'Tokens']}
+                formatter={(value) => [fmt(Number(value)), t('dashboard.heroTooltipTokens')]}
                 contentStyle={{ background: 'oklch(0.99 0.01 80)', border: '1px solid oklch(0.87 0.01 80)', borderRadius: '8px', fontSize: '12px' }}
               />
             </PieChart>
@@ -124,7 +126,7 @@ function ModelDonut({ models: raw }: { models: { model: string; total_input_toke
                 <span className="text-sm font-semibold truncate">{m.model}</span>
               </div>
               <div className="text-[11px] text-base-content/40 tabular-nums ml-[22px] mt-0.5 truncate">
-                输入 {fmt(m.total_input_tokens)} · 输出 {fmt(m.total_output_tokens)} · {m.request_count}次
+                {t('common.input')} {fmt(m.total_input_tokens)} · {t('common.output')} {fmt(m.total_output_tokens)} · {t('dashboard.requests', { count: m.request_count })}
               </div>
             </div>
           ))}
@@ -134,19 +136,20 @@ function ModelDonut({ models: raw }: { models: { model: string; total_input_toke
       <div className="flex items-center gap-5 pt-2 border-t border-base-200">
         <div className="flex items-center gap-1.5">
           <div className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ background: DONUT_COLORS[0] }} />
-          <span className="text-[11px] text-base-content/50">输入 {fmt(chartData[0].value)}</span>
+          <span className="text-[11px] text-base-content/50">{t('common.input')} {fmt(chartData[0].value)}</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ background: DONUT_COLORS[1] }} />
-          <span className="text-[11px] text-base-content/50">输出 {fmt(chartData[1].value)}</span>
+          <span className="text-[11px] text-base-content/50">{t('common.output')} {fmt(chartData[1].value)}</span>
         </div>
-        <span className="text-[11px] text-base-content/30 ml-auto shrink-0">总计 {fmt(total)}</span>
+        <span className="text-[11px] text-base-content/30 ml-auto shrink-0">{t('common.total')} {fmt(total)}</span>
       </div>
     </div>
   );
 }
 
 export function Dashboard() {
+  const { t, i18n } = useTranslation();
   const { data, loading } = usePolling(() => api.getDashboard('30d'), 30000);
 
   const overview = data?.overview?.opencode;
@@ -154,14 +157,14 @@ export function Dashboard() {
   const tokens = data?.model_tokens ?? [];
 
   const hero = useMemo(() => {
-    const t = tokens.reduce((s, m) => s + m.total_input_tokens + m.total_output_tokens, 0);
+    const tkn = tokens.reduce((s, m) => s + m.total_input_tokens + m.total_output_tokens, 0);
     const r = tokens.reduce((s, m) => s + m.request_count, 0);
     return [
-      { label: '账户', value: overview?.account_count ?? '-', sub: `${overview?.success_count ?? 0} 可用 · ${overview?.blocked_count ?? 0} 阻塞` },
-      { label: '剩余配额', value: overview ? `${overview.avg_effective_remaining}%` : '-', sub: `平均剩余比例` },
-      { label: '总 Token 消耗', value: fmt(t), sub: `${r.toLocaleString()} 次请求` },
+      { label: t('dashboard.account'), value: overview?.account_count ?? '-', sub: t('dashboard.availableBlocked', { available: overview?.success_count ?? 0, blocked: overview?.blocked_count ?? 0 }) },
+      { label: t('dashboard.remainingQuota'), value: overview ? `${overview.avg_effective_remaining}%` : '-', sub: t('dashboard.avgRemainingRatio') },
+      { label: t('dashboard.totalTokenConsumption'), value: fmt(tkn), sub: t('dashboard.requests', { count: r.toLocaleString() }) },
     ];
-  }, [overview, tokens]);
+  }, [overview, tokens, t, i18n.language]);
 
   if (loading && !data) {
     return (
@@ -170,7 +173,7 @@ export function Dashboard() {
           <div className="h-1 bg-base-200 rounded-full overflow-hidden relative">
             <div className="absolute inset-0 h-full bg-gradient-to-r from-primary to-secondary rounded-full animate-loading-bar" />
           </div>
-          <p className="text-[11px] text-base-content/40 text-center">加载中...</p>
+          <p className="text-[11px] text-base-content/40 text-center">{t('common.loading')}</p>
         </div>
       </div>
     );
@@ -178,7 +181,7 @@ export function Dashboard() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-lg font-bold">用量统计总览</h1>
+      <h1 className="text-lg font-bold">{t('dashboard.title')}</h1>
 
       <div className="grid grid-cols-3 gap-4">
         {hero.map((h) => (
@@ -192,9 +195,9 @@ export function Dashboard() {
 
       <div className="flex gap-4">
         <div className="flex-1 border border-base-200 rounded-xl p-4 flex flex-col min-h-0">
-          <div className="text-xs font-bold text-base-content/50 uppercase tracking-wider mb-3 shrink-0">账户配额状态</div>
+          <div className="text-xs font-bold text-base-content/50 uppercase tracking-wider mb-3 shrink-0">{t('dashboard.accountQuotaStatus')}</div>
           {quota.length === 0 ? (
-            <div className="text-sm text-base-content/40 text-center py-6">暂无数据</div>
+            <div className="text-sm text-base-content/40 text-center py-6">{t('common.noData')}</div>
           ) : (
             <div className="flex-1 max-h-[280px] overflow-y-auto space-y-4 pr-1">
               {quota.map((q) => (
@@ -207,28 +210,29 @@ export function Dashboard() {
           )}
           <div className="text-[11px] text-base-content/30 mt-3 pt-3 border-t border-base-200 shrink-0">
             {quota.some((q) => q.windows.some((w) => w.used >= 100))
-              ? '部分额度已用尽，请注意续费或调整使用策略'
+              ? t('dashboard.partialExhausted')
               : quota.some((q) => q.windows.some((w) => w.used >= 80))
-              ? '部分额度即将用尽，建议关注'
-              : '各账户额度充足，运行正常'}
+              ? t('dashboard.partialWarning')
+              : t('dashboard.allGood')}
           </div>
         </div>
 
         <div className="flex-1 border border-base-200 rounded-xl p-4">
-          <div className="text-xs font-bold text-base-content/50 uppercase tracking-wider mb-3">模型用量 Top 3</div>
+          <div className="text-xs font-bold text-base-content/50 uppercase tracking-wider mb-3">{t('dashboard.modelTop3')}</div>
           <ModelDonut models={tokens} />
           <div className="text-[11px] text-base-content/30 mt-3 pt-3 border-t border-base-200">
             {tokens.length > 0
-              ? `消耗最多的模型是 ${tokens[0]?.model ?? ''}，占比 ${
-                  tokens[0] ? ((tokens[0].total_input_tokens + tokens[0].total_output_tokens) / (tokens.reduce((s, m) => s + m.total_input_tokens + m.total_output_tokens, 0)) * 100).toFixed(1) : 0
-                }%`
-              : '暂无法获取模型用量数据'}
+              ? t('dashboard.mostConsumed', {
+                  model: tokens[0]?.model ?? '',
+                  percent: tokens[0] ? ((tokens[0].total_input_tokens + tokens[0].total_output_tokens) / (tokens.reduce((s, m) => s + m.total_input_tokens + m.total_output_tokens, 0)) * 100).toFixed(1) : 0,
+                })
+              : t('dashboard.noModelData')}
           </div>
         </div>
       </div>
 
       <div className="border border-base-200 rounded-xl p-4">
-        <div className="text-xs font-bold text-base-content/50 uppercase tracking-wider mb-3">最近使用记录</div>
+        <div className="text-xs font-bold text-base-content/50 uppercase tracking-wider mb-3">{t('dashboard.recentUsage')}</div>
         <UsageTable records={data?.recent_usage?.records ?? []} showAccount />
       </div>
     </div>

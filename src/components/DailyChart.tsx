@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import {
   LineChart,
   Line,
@@ -15,6 +16,8 @@ interface DailyChartProps {
 }
 
 export function DailyChart({ data, mode }: DailyChartProps) {
+  const { t } = useTranslation();
+
   const chartData = [...data].reverse().map((d) => ({
     date: d.date.slice(5),
     fullDate: d.date,
@@ -52,8 +55,8 @@ export function DailyChart({ data, mode }: DailyChartProps) {
           }}
           formatter={(value, name) => {
             const v = Number(value);
-            if (name === 'cost') return ['$' + v.toFixed(4), '费用'];
-            return [v, '请求数'];
+            if (name === 'cost') return ['$' + v.toFixed(4), t('dailyTrends.tooltipCost')];
+            return [v, t('dailyTrends.tooltipRequests')];
           }}
           labelFormatter={(label) => {
             const match = chartData.find((d) => d.date === label);
