@@ -3,7 +3,7 @@
      role="img" aria-labelledby="hero-title hero-desc">
   <title id="hero-title">68HUB — OpenCode Go 用量统计面板</title>
   <desc id="hero-desc">68HUB desktop dashboard for OpenCode Go token usage monitoring.</desc>
-  <rect width="1200" height="200" rx="16" fill="#0f0f0f"/>
+  <rect width="1200" height="200" rx="16" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
 
   <g transform="translate(56, 28)">
     <g transform="translate(0, 0) scale(0.09)">
@@ -39,9 +39,9 @@
       <path d="M864.8 667.5c0-167.9-157.5-304.1-351.8-304.1S161.2 499.6 161.2 667.5v-43.4C161.2 456.2 318.7 320 513 320s351.8 136.1 351.8 304.1" fill="#A81C0E"/>
     </g>
 
-    <text x="110" y="72" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-serif" font-size="56" font-weight="700" fill="#f0f0f0" letter-spacing="2">68HUB</text>
-    <text x="112" y="104" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-serif" font-size="18" fill="#9ca3af" letter-spacing="1">OpenCode Go 用量统计面板</text>
-    <text x="112" y="128" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="14" fill="#6b7280">Monitor token usage &amp; quota across accounts</text>
-    <text x="112" y="152" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" fill="#4b5563">Electron · React · TypeScript · Vite · Tailwind · daisyUI · Recharts · Hono · SQLite</text>
+    <text x="110" y="72" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-serif" font-size="56" font-weight="700" fill="#1a1a2e" letter-spacing="2">68HUB</text>
+    <text x="112" y="104" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-serif" font-size="18" fill="#475569" letter-spacing="1">OpenCode Go 用量统计面板</text>
+    <text x="112" y="128" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="14" fill="#94a3b8">Monitor token usage &amp; quota across accounts</text>
+    <text x="112" y="152" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" fill="#cbd5e1">Electron · React · TypeScript · Vite · Tailwind · daisyUI · Recharts · Hono · SQLite</text>
   </g>
 </svg>
