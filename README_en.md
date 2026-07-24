@@ -1,43 +1,27 @@
 <p align="center">
-  <picture>
-    <img src="public/logo.svg" width="80" alt="68HUB" />
-  </picture>
-  <h1 align="center">68HUB</h1>
-  <p align="center">OpenCode Go Usage Dashboard for Affordable Coding Plans</p>
-  <p align="center"><a href="README.md">中文</a></p>
+  <img src="./assets/readme/hero.svg" width="100%" alt="68HUB — OpenCode Go Usage Dashboard">
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Electron-47848F?logo=electron&logoColor=white" />
-  <img src="https://img.shields.io/badge/React-61DAFB?logo=react&logoColor=black" />
-  <img src="https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white" />
-  <img src="https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white" />
-  <img src="https://img.shields.io/badge/Tailwind_CSS-06B6D4?logo=tailwindcss&logoColor=white" />
-  <img src="https://img.shields.io/badge/daisyUI-5A0EF8?logo=daisyui&logoColor=white" />
-  <img src="https://img.shields.io/badge/Recharts-22B5BF?logo=recharts&logoColor=white" />
-  <br/>
-  <img src="https://img.shields.io/badge/Hono-E36002?logo=hono&logoColor=white" />
-  <img src="https://img.shields.io/badge/SQLite-003B57?logo=sqlite&logoColor=white" />
-  <img src="https://img.shields.io/badge/Windows-0078D4?logo=windows&logoColor=white" />
-  <img src="https://img.shields.io/badge/License-MIT-yellow" />
+  <a href="./README.md"><img src="./assets/readme/lang-en.svg" width="100%" alt="Switch to 中文"></a>
 </p>
+
+---
 
 <p align="center">
-  <a href="https://github.com/evanfu0110/68hub/releases">
-    <img src="https://img.shields.io/badge/Download-v1.1.1-4FC08D?logo=download&style=for-the-badge" />
-  </a>
+  <img src="./assets/readme/section-preview.svg" width="100%" alt="Screenshots">
 </p>
-
-## Screenshots
 
 | Page | Preview |
 |------|---------|
-| 1. Usage Dashboard | ![Dashboard](Preview%20Photo/1.png) |
-| 2. Token Stats | ![Token Stats](Preview%20Photo/2.png) |
-| 3. Daily Trends | ![Daily Trends](Preview%20Photo/3.png) |
-| 5. Settings | ![Settings](Preview%20Photo/5.png) |
+| 📊 **Usage Dashboard** | ![Dashboard](Preview%20Photo/1.png) |
+| 📈 **Token Stats** | ![Token Stats](Preview%20Photo/2.png) |
+| 📅 **Daily Trends** | ![Daily Trends](Preview%20Photo/3.png) |
+| ⚙️ **Settings** | ![Settings](Preview%20Photo/5.png) |
 
-## Features
+<p align="center">
+  <img src="./assets/readme/section-features.svg" width="100%" alt="Features">
+</p>
 
 | Module | Description |
 |--------|-------------|
@@ -48,7 +32,9 @@
 | ⚙️ **Settings** | Multi-account management (add/test/sync/backfill/delete), auto-sync toggle and interval setting |
 | ℹ️ **About** | Contact info and tech stack |
 
-## Quick Start
+<p align="center">
+  <img src="./assets/readme/section-quickstart.svg" width="100%" alt="Quick Start">
+</p>
 
 ```bash
 # Install dependencies
@@ -63,15 +49,17 @@ pnpm dev:vite
 
 > The embedded backend starts automatically with the Electron main process (Hono + better-sqlite3), no need to start a separate Python service.
 
-## Build
+<p align="center">
+  <img src="./assets/readme/section-accounts.svg" width="100%" alt="Multi-Account Support">
+</p>
 
-```bash
-pnpm dist
-```
+- **Quota**: Each account independently displays 5h/7d/30d progress bars
+- **Charts**: All account data aggregated, filterable by account
+- **Control**: Each account can be individually enabled/disabled
 
-Output: `release\68HUB Setup 1.1.1.exe`
-
-## Tech Stack
+<p align="center">
+  <img src="./assets/readme/section-tech.svg" width="100%" alt="Tech Stack">
+</p>
 
 | Frontend | Backend | Tools |
 |----------|---------|-------|
@@ -80,7 +68,9 @@ Output: `release\68HUB Setup 1.1.1.exe`
 | Vite 5 + Tailwind 4 | zod | |
 | daisyUI 5 + Recharts | fetch (Node) | |
 
-## Project Structure
+<p align="center">
+  <img src="./assets/readme/section-structure.svg" width="100%" alt="Project Structure">
+</p>
 
 ```
 68HUB/
@@ -103,19 +93,31 @@ Output: `release\68HUB Setup 1.1.1.exe`
 └── build/                 # Icons (auto-generated)
 ```
 
-## Multi-Account Support
+<p align="center">
+  <img src="./assets/readme/section-build.svg" width="100%" alt="Build">
+</p>
 
-- **Quota**: Each account independently displays 5h/7d/30d progress bars
-- **Charts**: All account data aggregated, filterable by account
-- **Control**: Each account can be individually enabled/disabled
+```bash
+pnpm dist
+```
 
-## Acknowledgments
+Output: `release\68HUB Setup 1.1.1.exe`
+
+<p align="center">
+  <img src="./assets/readme/section-thanks.svg" width="100%" alt="Acknowledgments">
+</p>
 
 - [QuotaHub](https://github.com/lvmiao233/QuotaHub) — Backend architecture inspiration
 - [OpenCode](https://opencode.ai) — API provider
 
-## Contact
+<p align="center">
+  <img src="./assets/readme/section-contact.svg" width="100%" alt="Contact">
+</p>
 
-- Email：1771005798@qq.com
-- Telegram：[@Z6ix8ightBot](https://t.me/Z6ix8ightBot)
-- Website：[www.110.wtf](https://www.110.wtf)
+- Email: 1771005798@qq.com
+- Telegram: [@Z6ix8ightBot](https://t.me/Z6ix8ightBot)
+- Website: [www.110.wtf](https://www.110.wtf)
+
+<p align="center">
+  <img src="./assets/readme/section-license.svg" width="100%" alt="License MIT">
+</p>
