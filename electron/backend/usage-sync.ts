@@ -50,31 +50,35 @@ async function fetchAndInsertBatch(
   workspaceId: string,
   pages: number[],
   insertedTotal: number,
-): Promise<[number, number, number]> {
+): Promise<{
+  inserted: number;
+  pagesFetched: number;
+  lastPage: number | null;
+  reachedEnd: boolean;
+}> {
   const results = await Promise.all(
     pages.map((p) =>
       fetchUsagePage({
         workspace_id: workspaceId,
         auth_cookie: account.auth_cookie,
         page: p,
-      }).then(
-        (r) => r as ParsedUsageRecord[] | Error,
-        (e) => e as Error,
-      ),
+      }),
     ),
   );
 
   let newInserted = 0;
   let pagesDone = 0;
   let total = insertedTotal;
+  let lastPage: number | null = null;
 
   for (let i = 0; i < pages.length; i++) {
     const p = pages[i];
-    const result = results[i];
-    if (result instanceof Error) continue;
-    const records = result;
-    if (!records.length) continue;
+    const records = results[i] as ParsedUsageRecord[];
+    if (!records.length) {
+      return { inserted: newInserted, pagesFetched: pagesDone, lastPage, reachedEnd: true };
+    }
     pagesDone += 1;
+    lastPage = p;
     const newInPage = db.insertUsageRecordsIgnore(
       account.id,
       workspaceId,
@@ -84,12 +88,11 @@ async function fetchAndInsertBatch(
     total += newInPage;
     syncProgress.update(account.id, p + 1, total);
     if (records.length < USAGE_PAGE_SIZE) {
-      return [newInserted, pagesDone, -1];
+      return { inserted: newInserted, pagesFetched: pagesDone, lastPage, reachedEnd: true };
     }
   }
 
-  if (pagesDone === 0) return [newInserted, pagesDone, -1];
-  return [newInserted, pagesDone, 0];
+  return { inserted: newInserted, pagesFetched: pagesDone, lastPage, reachedEnd: false };
 }
 
 export async function syncUsage(
@@ -137,19 +140,22 @@ export async function syncUsage(
       const batchSize = Math.min(BATCH_SIZE, remaining);
       const batchPages = Array.from({ length: batchSize }, (_, i) => page + i);
 
-      const [newInserted, pagesDone, stopSignal] = await fetchAndInsertBatch(
+      const batch = await fetchAndInsertBatch(
         account,
         workspaceId,
         batchPages,
         insertedTotal,
       );
-      insertedTotal += newInserted;
-      pagesFetched += pagesDone;
-      page += batchSize;
-      if (stopSignal < 0) break;
+      insertedTotal += batch.inserted;
+      pagesFetched += batch.pagesFetched;
+      if (batch.lastPage != null) {
+        deepest = Math.max(deepest, batch.lastPage);
+        db.updateUsageSyncState(account.id, { deepest_page_fetched: deepest });
+        page = batch.lastPage + 1;
+      }
+      if (batch.reachedEnd) break;
     }
 
-    deepest = pagesFetched ? Math.max(deepest, page - 1) : deepest;
     db.updateUsageSyncState(account.id, {
       last_sync_at: syncAt,
       last_sync_status: 'ok',
@@ -197,21 +203,19 @@ export async function backfillUsage(
       const batchSize = Math.min(BATCH_SIZE, remaining);
       const batchPages = Array.from({ length: batchSize }, (_, i) => page + i);
 
-      const [newInserted, pagesDone, stopSignal] = await fetchAndInsertBatch(
+      const batch = await fetchAndInsertBatch(
         account,
         workspaceId,
         batchPages,
         insertedTotal,
       );
-      insertedTotal += newInserted;
-      pagesFetched += pagesDone;
-      page += batchSize;
-
-      for (const p of batchPages.slice(0, pagesDone)) {
-        db.updateUsageSyncState(account.id, { deepest_page_fetched: p });
+      insertedTotal += batch.inserted;
+      pagesFetched += batch.pagesFetched;
+      if (batch.lastPage != null) {
+        db.updateUsageSyncState(account.id, { deepest_page_fetched: batch.lastPage });
+        page = batch.lastPage + 1;
       }
-
-      if (stopSignal < 0) break;
+      if (batch.reachedEnd) break;
     }
 
     db.refreshUsageSyncTotals(account.id);

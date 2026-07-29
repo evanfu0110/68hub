@@ -64,14 +64,14 @@ const icons: Record<string, JSX.Element> = {
 function SidebarInner() {
   const links = useLinks();
   return (
-    <nav className="w-16 bg-base-200 border-r border-base-300 flex flex-col items-center py-4 gap-1 shrink-0">
+    <nav className="app-navigation">
       {links.map((link) => (
         <NavLink
           key={link.to}
           to={link.to}
           end={link.to === '/'}
           className={({ isActive }) =>
-            `tooltip tooltip-right tooltip-neutral flex items-center justify-center w-10 h-10 rounded-xl transition-colors duration-100 ${
+            `app-navigation-link md:tooltip md:tooltip-right md:tooltip-neutral ${
               isActive
                 ? 'bg-primary text-primary-content shadow-sm shadow-primary/30'
                 : 'text-base-content/60 hover:text-base-content hover:bg-base-300'
@@ -80,6 +80,7 @@ function SidebarInner() {
           data-tip={link.label}
         >
           {icons[link.icon]}
+          <span>{link.label}</span>
         </NavLink>
       ))}
     </nav>

@@ -10,6 +10,13 @@ import {
 
 app.commandLine.appendSwitch('disable-features', 'Autofill');
 
+// electron-builder exposes this directory when running its Windows portable target.
+// Keeping userData here makes settings, Chromium state, and backend data movable together.
+const portableExecutableDir = process.env.PORTABLE_EXECUTABLE_DIR;
+if (portableExecutableDir) {
+  app.setPath('userData', path.join(portableExecutableDir, 'data'));
+}
+
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
 
 let mainWindow: BrowserWindow | null = null;
@@ -237,9 +244,7 @@ app.whenReady().then(async () => {
 
 app.on('window-all-closed', () => {
   void stopBackend();
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+  app.quit();
 });
 
 app.on('before-quit', () => {

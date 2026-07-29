@@ -692,18 +692,22 @@ export function saveServiceSettingsPayload(payload: Record<string, unknown>): vo
 }
 
 export function opencodeModelTokenStats(
-  period = '30d',
+  period: string | number = '30d',
   accountId?: string | null,
 ): Record<string, unknown>[] {
   let where: string;
-  if (period === '5h') {
+  const params: unknown[] = [];
+  if (typeof period === 'number') {
+    const days = Math.max(1, Math.min(Math.floor(period), 365));
+    where = "WHERE datetime(created_at) >= datetime('now', ?)";
+    params.push(`-${days} days`);
+  } else if (period === '5h') {
     where = "WHERE datetime(created_at) >= datetime('now', '-5 hours')";
   } else if (period === '7d') {
     where = "WHERE datetime(created_at) >= datetime('now', '-7 days')";
   } else {
     where = "WHERE datetime(created_at) >= datetime('now', '-30 days')";
   }
-  const params: unknown[] = [];
   if (accountId) {
     where += ' AND account_id = ?';
     params.push(accountId);

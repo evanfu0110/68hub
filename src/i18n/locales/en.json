@@ -66,7 +66,12 @@
     "allGood": "All accounts healthy, running normally",
     "mostConsumed": "Most consumed model is {{model}}, accounting for {{percent}}%",
     "noModelData": "Unable to fetch model usage data",
-    "heroTooltipTokens": "Tokens"
+    "heroTooltipTokens": "Tokens",
+    "pullToRefresh": "Pull to refresh",
+    "releaseToRefresh": "Release to refresh",
+    "refreshing": "Syncing...",
+    "syncComplete": "Sync complete, {{count}} new records",
+    "syncFailed": "Sync failed: {{msg}}"
   },
   "tokenStats": {
     "title": "Token Stats",
@@ -120,6 +125,22 @@
     "systemSection": "System",
     "tray": "Minimize to System Tray",
     "trayDesc": "Hide to tray when closing window instead of quitting",
+    "networkProxy": "Network Proxy",
+    "proxyMode": "Proxy Mode",
+    "proxyModeDesc": "Uses the system/browser proxy by default; environment, manual, and direct modes are also available",
+    "proxySystem": "System Proxy (Default)",
+    "proxyEnvironment": "Environment Variables",
+    "proxyManual": "Manual Proxy",
+    "proxyDirect": "Direct Connection",
+    "proxyUrl": "Proxy URL",
+    "proxyUrlDesc": "Supports http:// and https:// URLs with optional credentials; credentials are masked after saving",
+    "proxyUrlRequired": "Enter a manual proxy URL",
+    "noProxy": "Proxy Bypass List",
+    "noProxyDesc": "Comma-separated, for example 127.0.0.1,localhost,.company.local",
+    "caCertPath": "Corporate CA Certificate Path",
+    "caCertPathDesc": "Optional PEM certificate; system proxy mode uses the operating system trust store",
+    "saveProxySettings": "Save Proxy Settings",
+    "testProxy": "Test Internet Connection",
     "accounts": "OpenCode Accounts",
     "addAccount": "Add Account",
     "noAccounts": "No accounts yet, click \"Add Account\" to start",
@@ -183,6 +204,9 @@
     "toastResetFailed": "Reset failed: {{msg}}",
     "toastTrayOn": "Minimize to tray enabled, window will hide to system tray when closed",
     "toastTrayOff": "Tray mode disabled",
+    "toastProxySaved": "Proxy settings saved",
+    "toastProxyTestSuccess": "Connection succeeded in {{ms}} ms",
+    "toastProxyTestFailed": "Connection failed: {{msg}}",
     "toastOpFailed": "Operation failed: {{msg}}",
     "min1": "1 min",
     "min5": "5 min",
@@ -193,7 +217,15 @@
     "pages500": "500 pages",
     "pages1000": "1000 pages",
     "saveSyncSettings": "Save Sync Settings",
-    "saveBackfillSettings": "Save Backfill Settings"
+    "saveBackfillSettings": "Save Backfill Settings",
+    "localSecretDesc": "Cookies stay in this device's secure system store and are never written to SQLite or uploaded.",
+    "syncProgress": "Read {{pages}} pages, added {{count}} records",
+    "syncDone": "Sync complete, added {{count}} records",
+    "cookieGuide": {
+      "title": "How to get the Auth Cookie",
+      "windows": "1. Sign in to opencode.ai in your browser\n2. Press F12 and open Application → Cookies\n3. Select https://opencode.ai and copy the auth value\n4. Add an account in 68HUB and paste it. Never share this Cookie.",
+      "android": "1. Sign in to opencode.ai in a trusted desktop browser and obtain the auth Cookie\n2. Transfer it to your phone using your own secure method\n3. Add an account in 68HUB and paste it\n4. Clear the clipboard afterwards and never share the Cookie."
+    }
   },
   "about": {
     "title": "About 68HUB",
@@ -209,6 +241,7 @@
     "techStack": "Tech Stack",
     "thanks": "Acknowledgments",
     "thanksText": "Backend inspiration from QuotaHub, rewritten as Hono + better-sqlite3 embedded in Electron main process,告别双进程打包.",
+    "localFirst": "Version 2.0 uses a local Tauri and Rust core for Windows, Intel Mac, and Android, with no localhost HTTP service.",
     "checking": "Checking for updates...",
     "latest": "You have the latest version",
     "newVersion": "New version v{{version}} available",
@@ -228,7 +261,9 @@
     "themeLabel": "Interface Theme",
     "tray": "Minimize to System Tray",
     "trayDesc": "Hide to tray when closing window instead of quitting",
-    "start": "Get Started"
+    "start": "Get Started",
+    "localTitle": "Data stays on this device",
+    "localDesc": "Account Cookies use the system secure store and usage history stays in local SQLite. There is no cloud account or background resident service."
   },
   "syncProgress": {
     "done": "Done",

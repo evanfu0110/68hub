@@ -66,7 +66,12 @@
     "allGood": "各账户额度充足，运行正常",
     "mostConsumed": "消耗最多的模型是 {{model}}，占比 {{percent}}%",
     "noModelData": "暂无法获取模型用量数据",
-    "heroTooltipTokens": "Tokens"
+    "heroTooltipTokens": "Tokens",
+    "pullToRefresh": "下拉刷新",
+    "releaseToRefresh": "松开刷新",
+    "refreshing": "正在同步...",
+    "syncComplete": "同步完成，新增 {{count}} 条",
+    "syncFailed": "同步失败：{{msg}}"
   },
   "tokenStats": {
     "title": "Token 统计",
@@ -120,6 +125,22 @@
     "systemSection": "系统",
     "tray": "最小化到系统托盘",
     "trayDesc": "关闭窗口时隐藏到托盘，而非退出",
+    "networkProxy": "网络代理",
+    "proxyMode": "代理模式",
+    "proxyModeDesc": "默认跟随系统/浏览器代理，也可选择环境变量、手动代理或直连",
+    "proxySystem": "系统代理（默认）",
+    "proxyEnvironment": "环境变量",
+    "proxyManual": "手动代理",
+    "proxyDirect": "直接连接",
+    "proxyUrl": "代理地址",
+    "proxyUrlDesc": "支持 http:// 或 https://，可包含用户名和密码；保存后凭据会被隐藏",
+    "proxyUrlRequired": "请填写手动代理地址",
+    "noProxy": "不走代理的地址",
+    "noProxyDesc": "用逗号分隔，例如 127.0.0.1,localhost,.company.local",
+    "caCertPath": "企业 CA 证书路径",
+    "caCertPathDesc": "可选 PEM 证书；系统代理模式使用操作系统证书库",
+    "saveProxySettings": "保存代理设置",
+    "testProxy": "测试外网连接",
     "accounts": "OpenCode 账户",
     "addAccount": "添加账户",
     "noAccounts": "暂无账户，点击\"添加账户\"开始",
@@ -183,6 +204,9 @@
     "toastResetFailed": "恢复失败: {{msg}}",
     "toastTrayOn": "已开启最小化到托盘，关闭窗口时将隐藏到系统托盘",
     "toastTrayOff": "已关闭托盘模式",
+    "toastProxySaved": "代理设置已保存",
+    "toastProxyTestSuccess": "连接成功，耗时 {{ms}} ms",
+    "toastProxyTestFailed": "连接失败: {{msg}}",
     "toastOpFailed": "操作失败: {{msg}}",
     "min1": "1 分钟",
     "min5": "5 分钟",
@@ -193,7 +217,15 @@
     "pages500": "500 页",
     "pages1000": "1000 页",
     "saveSyncSettings": "保存同步设置",
-    "saveBackfillSettings": "保存回填设置"
+    "saveBackfillSettings": "保存回填设置",
+    "localSecretDesc": "Cookie 保存在当前设备的系统安全存储中，不会写入数据库或上传云端。",
+    "syncProgress": "已读取 {{pages}} 页，新增 {{count}} 条",
+    "syncDone": "同步完成，新增 {{count}} 条",
+    "cookieGuide": {
+      "title": "如何获取 Auth Cookie",
+      "windows": "1. 在浏览器登录 opencode.ai\n2. 按 F12 打开开发者工具，进入 Application / 应用 → Cookies\n3. 选择 https://opencode.ai，复制 auth 的值\n4. 回到 68HUB 添加账户并粘贴。不要把 Cookie 发给任何人。",
+      "android": "1. 先在可信任的桌面浏览器登录 opencode.ai 并取得 auth Cookie\n2. 通过自己的安全方式复制到手机\n3. 在 68HUB 添加账户并粘贴\n4. 粘贴后清除剪贴板，不要把 Cookie 发给任何人。"
+    }
   },
   "about": {
     "title": "关于 68HUB",
@@ -209,6 +241,7 @@
     "techStack": "技术栈",
     "thanks": "致谢",
     "thanksText": "后端灵感来自 QuotaHub，已重写为 Hono + better-sqlite3 内嵌于 Electron 主进程，告别双进程打包。",
+    "localFirst": "2.0 使用 Tauri 与 Rust 本地核心，支持 Windows、Intel Mac 和 Android，不启动本机 HTTP 服务。",
     "checking": "正在检查更新...",
     "latest": "已是最新版本",
     "newVersion": "新版本 v{{version}} 可用",
@@ -228,7 +261,9 @@
     "themeLabel": "界面主题",
     "tray": "最小化到系统托盘",
     "trayDesc": "关闭窗口时隐藏到托盘，而非退出",
-    "start": "开始使用"
+    "start": "开始使用",
+    "localTitle": "数据只留在当前设备",
+    "localDesc": "账号 Cookie 进入系统安全存储，用量历史保存在本机 SQLite；没有云端账号，也不会后台常驻同步。"
   },
   "syncProgress": {
     "done": "完成",

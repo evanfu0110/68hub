@@ -8,7 +8,6 @@ export function OnboardingDialog() {
   const { t } = useTranslation();
   const [show, setShow] = useState(false);
   const { theme, setTheme } = useTheme();
-  const [tray, setTray] = useState(true);
   const ref = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -22,9 +21,6 @@ export function OnboardingDialog() {
 
   const handleFinish = async () => {
     localStorage.setItem(ONBOARDING_KEY, '1');
-    if (tray && window.electronAPI?.setTrayMode) {
-      await window.electronAPI.setTrayMode(true);
-    }
     ref.current?.close();
     setShow(false);
   };
@@ -56,17 +52,9 @@ export function OnboardingDialog() {
             </div>
           </div>
 
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-sm text-base-content/80">{t('onboarding.tray')}</div>
-              <div className="text-[11px] text-base-content/40 mt-0.5">{t('onboarding.trayDesc')}</div>
-            </div>
-            <input
-              type="checkbox"
-              className="toggle toggle-sm"
-              checked={tray}
-              onChange={(e) => setTray(e.target.checked)}
-            />
+          <div className="rounded-lg bg-base-200 px-3 py-2.5">
+            <div className="text-xs font-medium text-base-content/70">{t('onboarding.localTitle')}</div>
+            <div className="text-[11px] text-base-content/45 mt-1 leading-relaxed">{t('onboarding.localDesc')}</div>
           </div>
         </div>
 

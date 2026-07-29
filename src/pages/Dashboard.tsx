@@ -1,10 +1,13 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { usePolling } from '../hooks/usePolling';
+import { usePullToRefresh } from '../hooks/usePullToRefresh';
 import { api } from '../api/client';
+import { syncEnabledAccounts } from '../api/sync-enabled-accounts';
 import { ModelIcon } from '../components/ModelIcon';
 import { UsageTable } from '../components/UsageTable';
+import { useToast } from '../components/Toast';
 import type { QuotaWindow } from '../api/types';
 
 function fmt(v: number) {
@@ -92,8 +95,8 @@ function ModelDonut({ models: raw }: { models: { model: string; total_input_toke
 
   return (
     <div className="space-y-3">
-      <div className="flex gap-6">
-        <div className="w-[150px] h-[150px] shrink-0 select-none">
+      <div className="flex gap-3 sm:gap-6">
+        <div className="w-[112px] h-[140px] sm:w-[150px] sm:h-[150px] shrink-0 select-none">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -150,7 +153,25 @@ function ModelDonut({ models: raw }: { models: { model: string; total_input_toke
 
 export function Dashboard() {
   const { t, i18n } = useTranslation();
-  const { data, loading } = usePolling(() => api.getDashboard('30d'), 30000);
+  const { toast } = useToast();
+  const { data, loading, refetch } = usePolling(() => api.getDashboard('30d'), 30000);
+  const syncAndRefresh = useCallback(async () => {
+    try {
+      const result = await syncEnabledAccounts({
+        listAccounts: api.listOpenCodeAccounts,
+        syncUsage: api.syncUsage,
+      });
+      toast(t('dashboard.syncComplete', { count: result.inserted }), 'success');
+    } catch (error) {
+      toast(t('dashboard.syncFailed', { msg: (error as Error).message }), 'error');
+    } finally {
+      await refetch();
+    }
+  }, [refetch, t, toast]);
+  const { pullDistance, isPulling, isRefreshing, isArmed, progress } = usePullToRefresh(
+    syncAndRefresh,
+    { enabled: Boolean(data) },
+  );
 
   const overview = data?.overview?.opencode;
   const quota = (data?.quota ?? []).filter((q) => q.success);
@@ -180,21 +201,67 @@ export function Dashboard() {
   }
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-lg font-bold">{t('dashboard.title')}</h1>
-
-      <div className="grid grid-cols-3 gap-4">
-        {hero.map((h) => (
-          <div key={h.label} className="border border-base-200 rounded-xl px-4 py-3">
-            <div className="text-[11px] font-bold text-base-content/40 uppercase tracking-wider">{h.label}</div>
-            <div className="text-3xl font-bold mt-1">{h.value}</div>
-            <div className="text-[11px] text-base-content/40 mt-0.5">{h.sub}</div>
-          </div>
-        ))}
+    <div className="relative">
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 z-20 flex justify-center"
+        style={{
+          opacity: isRefreshing ? 1 : Math.max(0, progress),
+          transform: `translateY(${Math.max(0, pullDistance - 36)}px)`,
+          transition: isPulling ? 'none' : 'opacity 160ms ease, transform 180ms ease',
+        }}
+        role="status"
+        aria-live="polite"
+      >
+        <div className="flex h-8 items-center gap-2 rounded-full border border-base-300 bg-base-100 px-3 text-[11px] font-medium text-base-content/60 shadow-sm">
+          {isRefreshing ? (
+            <span className="loading loading-spinner loading-xs" aria-hidden="true" />
+          ) : (
+            <svg
+              viewBox="0 0 24 24"
+              className="size-4 transition-transform duration-150"
+              style={{ transform: isArmed ? 'rotate(180deg)' : 'rotate(0deg)' }}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M12 5v14" />
+              <path d="m18 13-6 6-6-6" />
+            </svg>
+          )}
+          <span>
+            {isRefreshing
+              ? t('dashboard.refreshing')
+              : isArmed
+                ? t('dashboard.releaseToRefresh')
+                : t('dashboard.pullToRefresh')}
+          </span>
+        </div>
       </div>
 
-      <div className="flex gap-4">
-        <div className="flex-1 border border-base-200 rounded-xl p-4 flex flex-col min-h-0">
+      <div
+        className="space-y-4 will-change-transform"
+        style={{
+          transform: `translateY(${pullDistance}px)`,
+          transition: isPulling ? 'none' : 'transform 180ms ease',
+        }}
+      >
+        <h1 className="text-lg font-bold">{t('dashboard.title')}</h1>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+          {hero.map((h) => (
+            <div key={h.label} className="border border-base-200 rounded-xl px-4 py-3">
+              <div className="text-[11px] font-bold text-base-content/40 uppercase tracking-wider">{h.label}</div>
+              <div className="text-3xl font-bold mt-1">{h.value}</div>
+              <div className="text-[11px] text-base-content/40 mt-0.5">{h.sub}</div>
+            </div>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex-1 border border-base-200 rounded-xl p-4 flex flex-col min-h-0">
           <div className="text-xs font-bold text-base-content/50 uppercase tracking-wider mb-3 shrink-0">{t('dashboard.accountQuotaStatus')}</div>
           {quota.length === 0 ? (
             <div className="text-sm text-base-content/40 text-center py-6">{t('common.noData')}</div>
@@ -215,9 +282,9 @@ export function Dashboard() {
               ? t('dashboard.partialWarning')
               : t('dashboard.allGood')}
           </div>
-        </div>
+          </div>
 
-        <div className="flex-1 border border-base-200 rounded-xl p-4">
+          <div className="flex-1 border border-base-200 rounded-xl p-4">
           <div className="text-xs font-bold text-base-content/50 uppercase tracking-wider mb-3">{t('dashboard.modelTop3')}</div>
           <ModelDonut models={tokens} />
           <div className="text-[11px] text-base-content/30 mt-3 pt-3 border-t border-base-200">
@@ -228,12 +295,13 @@ export function Dashboard() {
                 })
               : t('dashboard.noModelData')}
           </div>
+          </div>
         </div>
-      </div>
 
-      <div className="border border-base-200 rounded-xl p-4">
-        <div className="text-xs font-bold text-base-content/50 uppercase tracking-wider mb-3">{t('dashboard.recentUsage')}</div>
-        <UsageTable records={data?.recent_usage?.records ?? []} showAccount />
+        <div className="border border-base-200 rounded-xl p-4">
+          <div className="text-xs font-bold text-base-content/50 uppercase tracking-wider mb-3">{t('dashboard.recentUsage')}</div>
+          <UsageTable records={data?.recent_usage?.records ?? []} showAccount />
+        </div>
       </div>
     </div>
   );

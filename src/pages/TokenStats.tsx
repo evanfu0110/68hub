@@ -44,14 +44,14 @@ export function TokenStats() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-lg font-bold">{t('tokenStats.title')}</h1>
           <p className="text-xs text-base-content/40 mt-1">{t('tokenStats.subtitle')}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="grid grid-cols-2 sm:flex items-center gap-2">
           <select
-            className="select select-bordered select-sm w-36"
+            className="select select-bordered select-sm w-full sm:w-36"
             value={accountId}
             onChange={(e) => setAccountId(e.target.value)}
           >
@@ -61,7 +61,7 @@ export function TokenStats() {
             ))}
           </select>
           <select
-            className="select select-bordered select-sm w-24"
+            className="select select-bordered select-sm w-full sm:w-24"
             value={days}
             onChange={(e) => setDays(Number(e.target.value))}
           >
@@ -73,14 +73,14 @@ export function TokenStats() {
         </div>
       </div>
 
-      <div className="flex gap-4 text-sm">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
         {[
           { label: t('tokenStats.totalRequests'), value: totalRequests.toLocaleString() },
           { label: t('tokenStats.input'), value: formatTokens(totalInput) },
           { label: t('tokenStats.output'), value: formatTokens(totalOutput) },
           { label: t('tokenStats.totalCost'), value: `$${totalCost.toFixed(4)}` },
         ].map((item) => (
-          <div key={item.label} className="border border-base-200 rounded-lg px-4 py-2.5 flex-1">
+          <div key={item.label} className="border border-base-200 rounded-lg px-3 sm:px-4 py-2.5">
             <div className="text-[11px] font-bold text-base-content/40 uppercase">{item.label}</div>
             <div className="text-lg font-bold mt-0.5">{item.value}</div>
           </div>

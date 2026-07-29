@@ -15,6 +15,7 @@ import {
   type OllamaAccountConfig,
 } from './config';
 import { fetchAllOllamaQuotas } from './ollama-quota';
+import { outboundFetch, resetOutboundHttpClient } from './http-client';
 import { resolveAccountWorkspaceId } from './opencode-usage';
 import { fetchAllQuotas, fetchQuotaForAccount, quotaAccountToDict } from './quota';
 import * as syncProgress from './sync-progress';
@@ -71,7 +72,27 @@ const ServiceConfigUpdate = z.object({
       usage_server_id: z.string().optional(),
     })
     .optional(),
+  network: z
+    .object({
+      proxy_mode: z.enum(['system', 'direct', 'environment', 'manual']).optional(),
+      proxy_url: z.string().optional(),
+      no_proxy: z.string().optional(),
+      ca_cert_path: z.string().optional(),
+    })
+    .optional(),
 });
+
+function maskProxyUrl(value: string): string {
+  if (!value) return '';
+  try {
+    const url = new URL(value);
+    if (url.username) url.username = '****';
+    if (url.password) url.password = '****';
+    return url.toString();
+  } catch {
+    return '****';
+  }
+}
 
 function opencodeAccountDict(row: db.OpenCodeAccountRow): Record<string, unknown> {
   return {
@@ -122,6 +143,13 @@ function buildConfigResponse(): Record<string, unknown> {
       interval_sec: service.usage_sync.interval_sec,
       backfill_pages_per_request: service.usage_sync.backfill_pages_per_request,
       max_pages_per_incremental: service.usage_sync.max_pages_per_incremental,
+    },
+    network: {
+      proxy_mode: service.network.proxy_mode,
+      proxy_url_masked: maskProxyUrl(service.network.proxy_url),
+      proxy_configured: Boolean(service.network.proxy_url),
+      no_proxy: service.network.no_proxy,
+      ca_cert_path: service.network.ca_cert_path,
     },
     accounts_imported:
       fs.existsSync(db.importedFlagPath()) ||
@@ -192,11 +220,38 @@ export function createApp(opts: { onConfigUpdated?: RestartSyncFn } = {}): Hono 
       if (body.refresh) updates.refresh = body.refresh;
       if (body.usage_sync) updates.usage_sync = body.usage_sync;
       if (body.opencode) updates.opencode = body.opencode;
+      if (body.network) updates.network = body.network;
       updateServiceConfig(updates);
+      resetOutboundHttpClient();
       opts.onConfigUpdated?.();
       return c.json(buildConfigResponse());
     } catch (exc) {
       return c.json({ detail: String(exc instanceof Error ? exc.message : exc) }, 500);
+    }
+  });
+
+  app.post('/api/network/test', async (c) => {
+    const startedAt = Date.now();
+    try {
+      const response = await outboundFetch('https://opencode.ai', {
+        method: 'HEAD',
+        redirect: 'manual',
+        signal: AbortSignal.timeout(15000),
+      });
+      return c.json({
+        success: true,
+        status: response.status,
+        elapsed_ms: Date.now() - startedAt,
+      });
+    } catch (error) {
+      return c.json(
+        {
+          success: false,
+          error: String(error instanceof Error ? error.message : error),
+          elapsed_ms: Date.now() - startedAt,
+        },
+        502,
+      );
     }
   });
 
@@ -476,7 +531,7 @@ export function createApp(opts: { onConfigUpdated?: RestartSyncFn } = {}): Hono 
     if (period && /^(5h|7d|30d)$/.test(period)) {
       return c.json({ days, stats: db.opencodeModelTokenStats(period, accountId) });
     }
-    return c.json({ days, stats: db.opencodeModelTokenStats('30d', accountId) });
+    return c.json({ days, stats: db.opencodeModelTokenStats(days, accountId) });
   });
 
   app.get('/api/usage/all', (c) => {
@@ -502,6 +557,7 @@ export function createApp(opts: { onConfigUpdated?: RestartSyncFn } = {}): Hono 
     try {
       ensureBootstrapped();
       saveSettingsPayload({});
+      resetOutboundHttpClient();
       opts.onConfigUpdated?.();
       return c.json(buildConfigResponse());
     } catch (exc) {

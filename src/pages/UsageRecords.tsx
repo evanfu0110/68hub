@@ -30,14 +30,14 @@ export function UsageRecords() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-semibold">{t('usageRecords.title')}</h1>
           <p className="text-sm text-base-content/50 mt-1">{t('usageRecords.subtitle', { total: total.toLocaleString() })}</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <select
-            className="select select-bordered select-sm w-40"
+            className="select select-bordered select-sm flex-1 sm:w-40"
             value={accountId}
             onChange={(e) => {
               setAccountId(e.target.value);

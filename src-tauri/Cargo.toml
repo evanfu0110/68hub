@@ -1,0 +1,54 @@
+[package]
+name = "hub68"
+version = "2.0.0"
+description = "Local-first OpenCode usage dashboard"
+authors = ["68HUB"]
+edition = "2021"
+rust-version = "1.88"
+
+[lib]
+name = "hub68_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.6.3", features = [] }
+
+[dependencies]
+chacha20poly1305 = "0.10"
+chrono = { version = "0.4", features = ["serde"] }
+futures = "0.3"
+getrandom = "0.2"
+regex = "1.11"
+reqwest = { version = "0.13.4", default-features = false, features = ["rustls", "gzip", "brotli"] }
+rusqlite = { version = "0.40.1", features = ["bundled", "chrono"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tauri = { version = "2.11.5", features = [] }
+thiserror = "2"
+tokio = { version = "1", features = ["sync"] }
+ts-rs = { version = "12.0.1", features = ["chrono-impl", "uuid-impl"] }
+url = "2"
+uuid = { version = "1", features = ["v4", "serde"] }
+
+[target.'cfg(target_os = "windows")'.dependencies]
+tauri-plugin-keyring-store = { version = "0.2.0", default-features = false }
+proxyparser = "0.1.0"
+systemproxy = "0.3.5"
+
+[target.'cfg(target_os = "android")'.dependencies]
+# reqwest's default rustls backend uses rustls-platform-verifier, which panics on
+# Android unless the optional JNI/Kotlin verifier is wired up. Use Mozilla roots
+# instead so HTTPS sync works without that extra native setup.
+rustls = { version = "0.23", default-features = false, features = ["std", "tls12", "aws-lc-rs"] }
+webpki-roots = "1"
+
+[dev-dependencies]
+tempfile = "3"
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "s"
+panic = "abort"
+strip = true

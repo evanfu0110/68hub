@@ -7,6 +7,7 @@ import { loadServiceConfig, setDataDir } from './config';
 import * as db from './db';
 import { syncUsage } from './usage-sync';
 import { closeDb } from './db';
+import { resetOutboundHttpClient } from './http-client';
 
 export interface BackendOptions {
   host?: string;
@@ -121,6 +122,7 @@ export async function startBackendServer(opts: BackendOptions = {}): Promise<{
 export async function stopBackendServer(): Promise<void> {
   stopped = true;
   clearSyncTimer();
+  resetOutboundHttpClient();
   if (!server) {
     closeDb();
     return;

@@ -33,11 +33,78 @@ body {
 }
 
 .content-area {
-  height: calc(100vh - 38px);
+  height: 100vh;
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: none;
   -ms-overflow-style: none;
+}
+
+.content-area.with-legacy-titlebar {
+  height: calc(100vh - 38px);
+}
+
+.app-navigation {
+  @apply fixed md:static z-40 bottom-0 inset-x-0 md:inset-auto md:w-16 bg-base-200/95 md:bg-base-200 backdrop-blur md:backdrop-blur-none border-t md:border-t-0 md:border-r border-base-300 flex md:flex-col items-center justify-around md:justify-start px-1 py-1.5 md:py-4 md:gap-1 shrink-0;
+  padding-bottom: max(0.375rem, env(safe-area-inset-bottom));
+}
+
+.app-navigation-link {
+  @apply flex flex-col md:flex-row items-center justify-center gap-0.5 md:gap-0 w-12 md:w-10 h-12 md:h-10 rounded-xl transition-colors duration-100;
+}
+
+.app-navigation-link span {
+  @apply text-[9px] leading-none md:hidden;
+}
+
+.settings-section {
+  @apply border-b border-base-200 pb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3;
+}
+
+.settings-heading {
+  @apply text-sm font-semibold;
+}
+
+.settings-description {
+  @apply text-xs text-base-content/45 mt-1;
+}
+
+.segmented-control {
+  @apply grid grid-cols-3 bg-base-200 rounded-lg p-1 w-full sm:w-auto;
+}
+
+.segmented-control button {
+  @apply min-w-20 h-8 px-3 rounded-md text-xs text-base-content/55 transition-colors;
+}
+
+.segmented-control button.active {
+  @apply bg-base-100 text-base-content shadow-sm;
+}
+
+.empty-surface {
+  @apply border border-dashed border-base-300 rounded-xl py-10 text-center text-sm text-base-content/40;
+}
+
+.account-row {
+  @apply px-3 sm:px-4 py-3 bg-base-100 flex flex-col sm:flex-row sm:items-center gap-3;
+}
+
+.account-actions {
+  @apply grid grid-cols-4 sm:flex items-center gap-1;
+}
+
+.status-dot {
+  @apply size-2 rounded-full bg-base-300 shrink-0;
+}
+
+.status-dot.enabled {
+  @apply bg-success;
+}
+
+@media (max-width: 639px) {
+  .recharts-wrapper {
+    font-size: 10px;
+  }
 }
 
 .input-native {

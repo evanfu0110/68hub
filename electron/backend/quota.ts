@@ -1,4 +1,5 @@
 import type { AccountConfig } from './config';
+import { outboundFetch } from './http-client';
 
 const DASHBOARD_BASE = 'https://opencode.ai/workspace';
 const WORKSPACE_SERVER_ID = 'def39973159c7f0483d8793a822b8dbb10d067e12c65455fcb4608459ba0234f';
@@ -99,7 +100,7 @@ async function fetchWithTimeout(
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    return await fetch(url, { ...init, signal: controller.signal });
+    return await outboundFetch(url, { ...init, signal: controller.signal });
   } finally {
     clearTimeout(timer);
   }

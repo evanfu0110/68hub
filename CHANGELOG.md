@@ -1,9 +1,45 @@
 # 68HUB Changelog
 
+## v2.0.0
+
+### Android sync crash + Android 9 support
+
+- Fixed Android sync/test/dashboard crash: reqwest's rustls-platform-verifier panics without JNI init; Android now uses Mozilla webpki-roots for HTTPS.
+- Lowered Android `minSdkVersion` from 29 (Android 10) to 28 (Android 9) for LDPlayer and other API 28 devices.
+- For x86/x86_64 emulators, build with `--target x86_64` (or universal) instead of arm64-only.
+
+### Android save-account crash fix
+
+- Android no longer writes cookies through Android Keystore on save; cookies are encrypted into the app private data dir instead.
+- Android SQLite uses DELETE journal mode instead of WAL for better OEM compatibility.
+- Windows still uses Windows Credential Manager.
+
+### Windows + Android 本地应用 | Windows + Android local app
+
+- 使用 Tauri 2 + React + Rust + SQLite 重构，支持 Windows x64 和 Android arm64。
+- 所有账号、Cookie 和历史用量只保存在当前设备；不需要云端后台、本机 HTTP 服务或固定端口。
+- Cookie 在 Windows Credential Manager 保存；Android 使用应用私有目录加密存储；SQLite 只保存凭证 ID。
+- 新增统一 `HubClient`、结构化错误、Rust/TypeScript 自动生成 DTO 和 CI 漂移校验。
+- 新增可续传的完整同步、单账号并发保护、批次提交和退出/Android 后台取消。
+- Windows 跟随系统代理及 PAC，Android 直连。
+- 新增移动端安全区、底部导航、单列卡片和窄屏记录卡片布局。
+- 2.0 使用独立数据库和应用标识，不迁移 Electron 1.x 数据，可与旧版并存。
+- 首版只支持 OpenCode，不包含 Ollama、托盘、后台定时同步、手动代理、自定义 CA、商店发布或自动更新。
+
+- Rebuilt with Tauri 2, React, Rust, and SQLite for Windows x64 and Android arm64.
+- Accounts, cookies, and history remain on-device with no cloud backend or localhost service.
+- Added OS credential storage, resumable sync, generated DTOs, structured errors, responsive mobile UI, system proxy/PAC support on desktop, and signed CI artifacts with SHA-256 checksums.
+
 ## v1.1.1
 
 ### 更新内容 | What's New
 
+- 🌐 **系统代理支持**：OpenCode/Ollama 请求默认跟随系统和浏览器代理，支持 PAC；也可选择环境变量、手动代理或直连
+  System proxy support: OpenCode/Ollama requests follow the OS/browser proxy and PAC by default, with environment, manual, and direct modes available
+- 📚 **历史用量可靠性**：修复回填失败时跳页的问题，并让 Token 排名正确使用所选时间范围
+  Historical usage reliability: Failed backfill pages are no longer skipped, and Token rankings now honor the selected time range
+- 🟢 **Windows 绿色便携版**：默认产出单文件 `68HUB-Portable-*.exe`，双击即用、免安装；配置与数据保存在 exe 同目录 `data/`，可整体拷贝
+  Windows portable build: ships a single `68HUB-Portable-*.exe` (double-click, no installer); settings/data stay in a sibling `data/` folder
 - 🌐 **中英双语支持**：可在设置中切换中文/English，默认为跟随系统语言
   Bilingual UI: Switch between Chinese and English in Settings, defaults to system language
 - 后端从 Python (FastAPI + PyInstaller) 迁移至 Node.js (Hono + better-sqlite3)，内嵌于 Electron 主进程

@@ -1,22 +1,32 @@
 {
   "name": "68hub",
-  "version": "1.1.1",
+  "version": "2.0.0",
   "description": "OpenCode Go 用量统计面板",
   "main": "dist-electron/main.js",
   "author": "68HUB",
   "license": "MIT",
   "scripts": {
-    "dev": "pnpm build:electron && pnpm rebuild:native && concurrently -k \"pnpm dev:vite\" \"wait-on dist-electron/main.js http://localhost:5173 && electron .\"",
+    "dev": "tauri dev",
+    "dev:android": "tauri android dev --host",
+    "dev:electron": "pnpm build:electron && pnpm rebuild:native && concurrently -k \"pnpm dev:vite\" \"wait-on dist-electron/main.js http://localhost:5173 && electron .\"",
     "dev:vite": "vite",
-    "build": "pnpm build:vite && pnpm build:electron",
+    "build": "tauri build",
+    "build:legacy": "pnpm build:vite && pnpm build:electron",
     "build:vite": "vite build",
     "build:electron": "tsc --project electron/tsconfig.json",
     "rebuild:native": "electron-rebuild -f -w better-sqlite3",
-    "dist": "pnpm build && pnpm rebuild:native && npx --yes electron-builder@25",
-    "dist:dir": "pnpm build && pnpm rebuild:native && npx --yes electron-builder@25 --dir",
+    "dist": "pnpm build:legacy && pnpm rebuild:native && npx --yes electron-builder@25 --win portable --x64",
+    "dist:portable": "pnpm build:legacy && pnpm rebuild:native && npx --yes electron-builder@25 --win portable --x64",
+    "dist:installer": "pnpm build:legacy && pnpm rebuild:native && npx --yes electron-builder@25 --win nsis --x64",
+    "dist:dir": "pnpm build:legacy && pnpm rebuild:native && npx --yes electron-builder@25 --dir",
     "postinstall": "pnpm build:electron",
+    "test": "pnpm test:web && pnpm test:rust && pnpm test:legacy",
+    "test:web": "tsc --noEmit && vite build",
+    "test:rust": "cargo test --manifest-path src-tauri/Cargo.toml",
+    "test:legacy": "pnpm build:electron && node tests/run-tests.cjs",
     "preview": "vite preview",
-    "electron": "electron ."
+    "electron": "electron .",
+    "tauri": "tauri"
   },
   "build": {
     "appId": "com.68hub.app",
@@ -37,21 +47,14 @@
     ],
     "win": {
       "icon": "public/icon.png",
+      "artifactName": "68HUB-Portable-${version}.${ext}",
+      "signAndEditExecutable": false,
       "target": [
-        { "target": "nsis", "arch": ["x64"] }
+        { "target": "portable", "arch": ["x64"] }
       ]
     },
-    "mac": {
-      "icon": "public/icon.png",
-      "target": [
-        { "target": "dmg", "arch": ["arm64"] }
-      ]
-    },
-    "linux": {
-      "icon": "public/icon.png",
-      "target": [
-        { "target": "AppImage", "arch": ["x64"] }
-      ]
+    "portable": {
+      "artifactName": "68HUB-Portable-${version}.${ext}"
     },
     "nsis": {
       "oneClick": false,
@@ -75,6 +78,7 @@
   ],
   "devDependencies": {
     "@electron/rebuild": "^4.2.0",
+    "@tauri-apps/cli": "^2.8.0",
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^20.14.0",
     "@types/react": "^18.3.3",
@@ -100,6 +104,7 @@
     "react-router-dom": "^7.18.1",
     "recharts": "^3.9.2",
     "tailwindcss": "^4.3.2",
+    "undici": "^6.27.0",
     "zod": "^4.4.3"
   }
 }

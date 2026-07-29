@@ -6,7 +6,10 @@ node_modules
 dist
 dist-electron
 release
+release-*
 out
+src-tauri/target
+src-tauri/gen
 
 # Local env files
 *.local

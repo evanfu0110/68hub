@@ -21,6 +21,12 @@ export const DEFAULT_SETTINGS_PAYLOAD: Record<string, unknown> = {
   opencode: {
     usage_server_id: DEFAULT_USAGE_SERVER_ID,
   },
+  network: {
+    proxy_mode: 'system',
+    proxy_url: '',
+    no_proxy: '127.0.0.1,localhost',
+    ca_cert_path: '',
+  },
 };
 
 export interface AccountConfig {
@@ -55,6 +61,15 @@ export interface UsageSyncSettings {
   max_pages_per_incremental: number;
 }
 
+export type ProxyMode = 'system' | 'direct' | 'environment' | 'manual';
+
+export interface NetworkSettings {
+  proxy_mode: ProxyMode;
+  proxy_url: string;
+  no_proxy: string;
+  ca_cert_path: string;
+}
+
 export interface ServiceConfig {
   listen_host: string;
   listen_port: number;
@@ -62,6 +77,7 @@ export interface ServiceConfig {
   refresh_opencode_go: RefreshSettings;
   opencode: OpenCodeSettings;
   usage_sync: UsageSyncSettings;
+  network: NetworkSettings;
 }
 
 let _dataDirOverride: string | null = null;
@@ -137,6 +153,7 @@ export function extractSettingsPayload(raw: Record<string, unknown>): Record<str
   if (raw.refresh && typeof raw.refresh === 'object') payload.refresh = raw.refresh;
   if (raw.usage_sync && typeof raw.usage_sync === 'object') payload.usage_sync = raw.usage_sync;
   if (raw.opencode && typeof raw.opencode === 'object') payload.opencode = raw.opencode;
+  if (raw.network && typeof raw.network === 'object') payload.network = raw.network;
   return payload;
 }
 
@@ -209,6 +226,33 @@ function parseOpenCodeSettings(raw: unknown): OpenCodeSettings {
   return { usage_server_id: server_id || DEFAULT_USAGE_SERVER_ID };
 }
 
+function parseNetworkSettings(raw: unknown): NetworkSettings {
+  const obj = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {};
+  const modeRaw = String(obj.proxy_mode || 'system');
+  const proxy_mode: ProxyMode =
+    modeRaw === 'direct' || modeRaw === 'environment' || modeRaw === 'manual'
+      ? modeRaw
+      : 'system';
+  const proxy_url = String(obj.proxy_url || '').trim();
+  const no_proxy = String(obj.no_proxy ?? '127.0.0.1,localhost').trim();
+  const ca_cert_path = String(obj.ca_cert_path || '').trim();
+
+  if (proxy_mode === 'manual') {
+    if (!proxy_url) throw new Error('手动代理模式需要填写代理地址');
+    let parsed: URL;
+    try {
+      parsed = new URL(proxy_url);
+    } catch {
+      throw new Error('代理地址格式无效');
+    }
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      throw new Error('代理地址仅支持 http:// 或 https://');
+    }
+  }
+
+  return { proxy_mode, proxy_url, no_proxy, ca_cert_path };
+}
+
 function listenSettingsFromLegacy(raw: Record<string, unknown>): [string, number] {
   const host = String(
     process.env['68BACKEND_LISTEN_HOST'] || raw.listen_host || DEFAULT_LISTEN_HOST,
@@ -256,6 +300,7 @@ export function loadServiceConfig(): ServiceConfig {
     refresh_opencode_go: parseRefreshSettings(refreshRaw.opencode_go, 60),
     opencode: parseOpenCodeSettings(settings.opencode),
     usage_sync: parseUsageSyncSettings(settings.usage_sync),
+    network: parseNetworkSettings(settings.network),
   };
 }
 
@@ -314,6 +359,19 @@ export function updateServiceConfig(updates: Record<string, unknown>): ServiceCo
     nextPayload.opencode = section;
   }
 
+  const networkUpdates = updates.network;
+  if (networkUpdates && typeof networkUpdates === 'object') {
+    const section: Record<string, unknown> = {
+      ...((nextPayload.network as Record<string, unknown>) || {}),
+    };
+    for (const field of ['proxy_mode', 'proxy_url', 'no_proxy', 'ca_cert_path'] as const) {
+      const value = (networkUpdates as Record<string, unknown>)[field];
+      if (value !== undefined && value !== null) section[field] = String(value).trim();
+    }
+    nextPayload.network = section;
+  }
+
+  parseNetworkSettings(nextPayload.network);
   saveSettingsPayload(nextPayload);
   return loadServiceConfig();
 }
