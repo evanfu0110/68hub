@@ -107,6 +107,7 @@ impl SyncManager {
             .unwrap_or_default()
     }
 
+    #[cfg_attr(not(target_os = "android"), allow(dead_code))]
     pub fn cancel_all(&self) {
         self.cancelled.store(true, Ordering::SeqCst);
     }

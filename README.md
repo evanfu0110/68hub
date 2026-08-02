@@ -1,125 +1,58 @@
-<p align="center">
-  <img src="./assets/readme/hero.svg" width="100%" alt="68HUB — OpenCode Go 用量统计面板">
-</p>
+# 68HUB Android
 
-<p align="center">
-  <a href="./README_en.md"><img src="./assets/readme/lang-zh.svg" width="100%" alt="切换至 English"></a>
-</p>
+68HUB Android 是一个面向 OpenCode Go 的本地用量统计应用，使用 Tauri 2、Rust、SQLite 和 React 构建。
 
----
+本项目基于 [evanfu0110/68hub](https://github.com/evanfu0110/68hub/) 二次开发，当前版本专注 Android 移动端，加入了本地 Rust 核心、加密 Cookie 存储、触摸下拉刷新和 Android APK 构建流程。感谢原作者 Evan Fu 的开源项目与基础实现！
 
-> 本项目基于 [evanfu0110/68hub](https://github.com/evanfu0110/68hub/) 二次开发，新增了 Tauri 2 + Rust 本地核心、Android 移动端支持和触摸交互。感谢原作者 Evan Fu 的开源项目与基础实现！
+## 功能
 
-<p align="center">
-  <img src="./assets/readme/section-preview.svg" width="100%" alt="预览 Screenshots">
-</p>
+- 多个 OpenCode Go 账户的配额和用量统计
+- Token 排名、每日趋势和使用记录
+- Android 触摸布局与下拉刷新
+- 数据和 Cookie 保存在当前设备，不依赖云端后台或 localhost 服务
+- Rust + SQLite 本地核心，网络请求使用 Android 专用 TLS 配置
+- 中英文界面
 
-| 页面 | 截图 |
-|------|------|
-| 📊 **用量总览** | ![Dashboard](Preview%20Photo/1.png) |
-| 📈 **Token 统计** | ![Token Stats](Preview%20Photo/2.png) |
-| 📅 **每日趋势** | ![Daily Trends](Preview%20Photo/3.png) |
-| ⚙️ **设置** | ![Settings](Preview%20Photo/5.png) |
+## 开发
 
-<p align="center">
-  <img src="./assets/readme/section-features.svg" width="100%" alt="功能 Features">
-</p>
-
-| 模块 | 说明 |
-|------|------|
-| 📊 **用量总览** | 账户数量、剩余配额、总 Token 消耗一目了然；左侧 5h/7d/30d 配额进度条，右侧 Top 3 模型 Input/Output 环形图 |
-| 📈 **Token 统计** | 模型 Token 消耗排名（堆叠柱状图）+ 各模型每日趋势（多系列折线图），支持按账户和时间范围筛选 |
-| 📅 **每日趋势** | 每日费用与请求量折线图，支持按账户和时间范围筛选 |
-| 📋 **使用记录** | 完整的使用记录日志，支持分页和账户筛选 |
-| ⚙️ **设置** | 多账户管理（新增/测试/同步/回填/删除），自动同步开关与间隔设置 |
-| ℹ️ **关于** | 联系方式与技术栈 |
-
-<p align="center">
-  <img src="./assets/readme/section-quickstart.svg" width="100%" alt="快速开始 Quick Start">
-</p>
+需要 Node.js、pnpm、Rust、Android Studio/SDK、Java 17 和 Android NDK。
 
 ```bash
-# 安装依赖
 pnpm install
 
-# 开发模式（自动启动后端 + Vite + Electron）
+# 浏览器模拟/桌面开发窗口
 pnpm dev
 
-# 仅启动前端 Vite（需后端或 Mock）
-pnpm dev:vite
+# Android 真机或模拟器开发
+pnpm dev:android
 ```
 
-> 内嵌后端（Hono + better-sqlite3）随 Electron 主进程自动启动，无需单独运行 Python 服务。
-
-<p align="center">
-  <img src="./assets/readme/section-accounts.svg" width="100%" alt="多账户支持 Multi-Account Support">
-</p>
-
-- **配额**：每个账户独立显示 5h/7d/30d 进度条
-- **图表**：所有账户数据汇总展示，可按账户筛选
-- **控制**：每个账户可独立启用/禁用
-
-<p align="center">
-  <img src="./assets/readme/section-tech.svg" width="100%" alt="技术栈 Tech Stack">
-</p>
-
-| 前端 | 后端 | 工具 |
-|------|------|------|
-| Electron 31 | Hono + better-sqlite3 | electron-builder |
-| React 18 | TypeScript | Windows x64 |
-| Vite 5 + Tailwind 4 | zod | |
-| daisyUI 5 + Recharts | fetch (Node) | |
-
-<p align="center">
-  <img src="./assets/readme/section-structure.svg" width="100%" alt="项目结构 Project Structure">
-</p>
-
-```
-68HUB/
-├── electron/
-│   ├── main.ts            # Electron 主进程 + 内嵌后端启动
-│   ├── preload.ts         # IPC 桥接
-│   └── backend/           # Node 后端（Hono + better-sqlite3）
-│       ├── server.ts      # HTTP 服务生命周期 + 自动同步
-│       ├── routes.ts      # 全部 API 路由
-│       ├── db.ts          # SQLite CRUD
-│       ├── config.ts      # 配置/脱敏
-│       ├── quota.ts       # OpenCode 配额获取
-│       ├── ollama-quota.ts # Ollama 配额获取
-│       ├── opencode-usage.ts # 用量记录获取
-│       ├── usage-sync.ts  # 增量/回填同步
-│       ├── analytics.ts   # 总览聚合
-│       └── ...
-├── src/                   # React 前端（api / components / pages / hooks）
-├── public/                # 静态资源
-└── build/                 # 图标（自动生成）
-```
-
-<p align="center">
-  <img src="./assets/readme/section-build.svg" width="100%" alt="构建 Build">
-</p>
+## 构建 APK
 
 ```bash
-pnpm dist
+pnpm tauri android init
+pnpm build:android
 ```
 
-输出：`release\68HUB Setup 1.1.1.exe`
+默认构建 Android arm64 APK。发布工作流位于 `.github/workflows/release.yml`，需要配置 Android 签名相关 Secrets。
 
-<p align="center">
-  <img src="./assets/readme/section-thanks.svg" width="100%" alt="致谢 Acknowledgments">
-</p>
+## 项目结构
 
-- [QuotaHub](https://github.com/lvmiao233/QuotaHub) — 后端架构灵感
-- [OpenCode](https://opencode.ai) — API 提供商
+```text
+src/                 React 移动端界面和 Tauri API 客户端
+src-tauri/src/       Rust 命令、SQLite、加密存储和同步逻辑
+src-tauri/           Tauri Android 配置
+.github/workflows/   Android APK 验证、签名和发布
+```
 
-<p align="center">
-  <img src="./assets/readme/section-contact.svg" width="100%" alt="联系 Contact">
-</p>
+## 隐私
 
-- 邮箱：1771005798@qq.com
-- Telegram：[@Z6ix8ightBot](https://t.me/Z6ix8ightBot)
-- 网站：[www.110.wtf](https://www.110.wtf)
+账户 Cookie 只在设备本地使用，并以加密形式保存；应用不会把账户信息上传到本项目或第三方服务器。
 
-<p align="center">
-  <img src="./assets/readme/section-license.svg" width="100%" alt="License MIT">
-</p>
+## 致谢
+
+感谢 [evanfu0110/68hub](https://github.com/evanfu0110/68hub/) 提供原始项目和产品基础。本仓库是其 Android 移动端衍生版本。
+
+## License
+
+MIT

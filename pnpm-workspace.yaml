@@ -2,9 +2,7 @@ packages:
   - '.'
 
 allowBuilds:
-  better-sqlite3: true
-  electron: true
+  '@tauri-apps/cli': true
   esbuild: true
-  lzma-native: true
 minimumReleaseAgeExclude:
   - daisyui@5.6.17

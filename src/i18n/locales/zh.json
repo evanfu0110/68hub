@@ -223,16 +223,15 @@
     "syncDone": "同步完成，新增 {{count}} 条",
     "cookieGuide": {
       "title": "如何获取 Auth Cookie",
-      "windows": "1. 在浏览器登录 opencode.ai\n2. 按 F12 打开开发者工具，进入 Application / 应用 → Cookies\n3. 选择 https://opencode.ai，复制 auth 的值\n4. 回到 68HUB 添加账户并粘贴。不要把 Cookie 发给任何人。",
       "android": "1. 先在可信任的桌面浏览器登录 opencode.ai 并取得 auth Cookie\n2. 通过自己的安全方式复制到手机\n3. 在 68HUB 添加账户并粘贴\n4. 粘贴后清除剪贴板，不要把 Cookie 发给任何人。"
     }
   },
   "about": {
     "title": "关于 68HUB",
     "version": "v{{version}} · OpenCode Go 用量统计面板",
-    "desc1": "68HUB 是一个专为 OpenCode Go 平价 Coding Plan 设计的本地用量统计桌面应用。",
+    "desc1": "68HUB 是一个专为 OpenCode Go 平价 Coding Plan 设计的 Android 本地用量统计应用。",
     "desc2": "OpenCode AI 官方的用量页面数据分散、操作繁琐，难以直观掌握各模型的 Token 消耗和账户配额状态。68HUB 通过后端定时同步数据，以清晰的图表和布局展示关键指标，让你一目了然。",
-    "download": "下载最新版本",
+    "download": "打开项目主页",
     "features": "功能",
     "feature1": "多账户配额实时监控（5小时 / 7天 / 30天）",
     "feature2": "各模型 Token 消耗排行与每日趋势",
@@ -240,8 +239,8 @@
     "feature4": "自动同步数据，无需手动刷新",
     "techStack": "技术栈",
     "thanks": "致谢",
-    "thanksText": "后端灵感来自 QuotaHub，已重写为 Hono + better-sqlite3 内嵌于 Electron 主进程，告别双进程打包。",
-    "localFirst": "2.0 使用 Tauri 与 Rust 本地核心，支持 Windows、Intel Mac 和 Android，不启动本机 HTTP 服务。",
+    "thanksText": "本项目基于 evanfu0110/68hub 改造，使用 Tauri 2 与 Rust 构建 Android 本地核心。感谢原作者 Evan Fu 的开源项目与基础实现！",
+    "localFirst": "Android 版本使用 Tauri 与 Rust 本地核心，数据只保存在当前设备，不启动本机 HTTP 服务。",
     "checking": "正在检查更新...",
     "latest": "已是最新版本",
     "newVersion": "新版本 v{{version}} 可用",
@@ -249,18 +248,12 @@
     "checkFailed": "无法检查更新",
     "contact": "联系方式"
   },
-  "titleBar": {
-    "closeDialogTitle": "关闭窗口时...",
-    "closeDialogDesc": "你可以将应用最小化到系统托盘，后台继续同步数据。",
-    "minimizeToTray": "最小化到托盘",
-    "quitApp": "退出应用"
-  },
   "onboarding": {
     "welcome": "欢迎使用 68HUB",
     "subtitle": "选择偏好的外观和系统行为",
     "themeLabel": "界面主题",
-    "tray": "最小化到系统托盘",
-    "trayDesc": "关闭窗口时隐藏到托盘，而非退出",
+    "tray": "后台运行",
+    "trayDesc": "Android 应用使用系统后台机制管理同步任务",
     "start": "开始使用",
     "localTitle": "数据只留在当前设备",
     "localDesc": "账号 Cookie 进入系统安全存储，用量历史保存在本机 SQLite；没有云端账号，也不会后台常驻同步。"

@@ -4,11 +4,7 @@ import type {
   DailyModelStat,
   DailyStat,
   ModelTokenStat,
-  OpenCodeAccount,
-  Overview,
-  QuotaAccount,
   SyncProgress,
-  UsageResponse,
 } from './types';
 import type { Account } from './generated/Account';
 import type { AccountInput } from './generated/AccountInput';
@@ -19,7 +15,13 @@ import type { SyncResult } from './generated/SyncResult';
 import type { UsagePage } from './generated/UsagePage';
 import type { UsageQuery } from './generated/UsageQuery';
 
-const REST_BASE = (import.meta.env.VITE_API_BASE || 'http://127.0.0.1:8788') + '/api';
+type TauriInvoke = <T>(command: string, args?: Record<string, unknown>) => Promise<T>;
+
+function invokeTransport(): TauriInvoke {
+  const transport = window.__TAURI__?.core?.invoke;
+  if (!transport) throw new Error('Tauri Android runtime is unavailable');
+  return transport;
+}
 
 export interface HubError {
   code: string;
@@ -27,25 +29,9 @@ export interface HubError {
   retryable: boolean;
 }
 
-type TauriInvoke = <T>(command: string, args?: Record<string, unknown>) => Promise<T>;
-
-interface DashboardResponse {
-  overview: Overview;
-  quota: QuotaAccount[];
-  recent_usage: { records: UsageResponse['records']; total: number };
-  model_tokens: ModelTokenStat[];
-  period: string;
-}
-
-function tauriInvoke(): TauriInvoke | null {
-  return window.__TAURI__?.core?.invoke ?? null;
-}
-
 async function invoke<T>(command: string, args?: Record<string, unknown>): Promise<T> {
-  const transport = tauriInvoke();
-  if (!transport) throw new Error('Tauri transport is unavailable');
   try {
-    return await transport<T>(command, args);
+    return await invokeTransport()<T>(command, args);
   } catch (error) {
     if (error && typeof error === 'object' && 'message' in error) {
       const payload = error as Partial<HubError>;
@@ -56,21 +42,6 @@ async function invoke<T>(command: string, args?: Record<string, unknown>): Promi
     throw error;
   }
 }
-
-async function rest<T>(method: string, path: string, body?: unknown): Promise<T> {
-  const response = await fetch(`${REST_BASE}${path}`, {
-    method,
-    headers: body ? { 'Content-Type': 'application/json' } : undefined,
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  if (!response.ok) {
-    const text = await response.text().catch(() => '');
-    throw new Error(`${response.status} ${response.statusText}${text ? `: ${text}` : ''}`);
-  }
-  return response.json();
-}
-
-const isTauri = () => Boolean(tauriInvoke());
 
 export interface HubClient {
   getDashboard(period: '5h' | '7d' | '30d'): Promise<Dashboard>;
@@ -106,119 +77,40 @@ export const hubClient: HubClient = {
 };
 
 export const api = {
-  isTauri,
-
-  getAppVersion: () =>
-    isTauri()
-      ? invoke<string>('get_app_version')
-      : window.electronAPI?.getVersion?.() ?? Promise.resolve('2.0.0'),
-
+  isTauri: () => true,
+  getAppVersion: () => invoke<string>('get_app_version'),
   getDashboard: (period = '30d') =>
-    isTauri()
-      ? hubClient.getDashboard(period as '5h' | '7d' | '30d')
-      : rest<DashboardResponse>('GET', `/dashboard?period=${period}`),
-
-  listOpenCodeAccounts: () =>
-    isTauri()
-      ? hubClient.listAccounts()
-      : rest<OpenCodeAccount[]>('GET', '/accounts/opencode'),
-
+    hubClient.getDashboard(period as '5h' | '7d' | '30d'),
+  listOpenCodeAccounts: () => hubClient.listAccounts(),
   createOpenCodeAccount: (input: {
     name: string;
     workspace_id?: string;
     auth_cookie: string;
   }) =>
-    isTauri()
-      ? hubClient.createAccount({ ...input, workspace_id: input.workspace_id || 'Default' })
-      : rest<OpenCodeAccount>('POST', '/accounts/opencode', input),
-
+    hubClient.createAccount({
+      ...input,
+      workspace_id: input.workspace_id || 'Default',
+    }),
   updateOpenCodeAccount: (id: string, input: Record<string, unknown>) =>
-    isTauri()
-      ? hubClient.updateAccount(id, input as AccountUpdate)
-      : rest<OpenCodeAccount>('PUT', `/accounts/opencode/${id}`, input),
-
-  deleteOpenCodeAccount: (id: string) =>
-    isTauri()
-      ? hubClient.deleteAccount(id)
-      : rest<{ ok: boolean }>('DELETE', `/accounts/opencode/${id}`),
-
-  testOpenCodeAccount: (id: string) =>
-    isTauri()
-      ? hubClient.testAccount(id)
-      : rest<AccountTestResult>('POST', `/accounts/opencode/${id}/test`),
-
-  syncUsage: (id: string) =>
-    isTauri()
-      ? hubClient.syncUsage(id)
-      : rest<{ inserted: number; pages_fetched: number; sync_at: string }>(
-          'POST',
-          `/accounts/opencode/${id}/usage/sync`,
-        ),
-
-  syncProgress: (id: string) =>
-    isTauri()
-      ? invoke<SyncProgress>('get_sync_progress', { id })
-      : rest<SyncProgress>('GET', `/accounts/opencode/${id}/usage/progress`),
-
+    hubClient.updateAccount(id, input as AccountUpdate),
+  deleteOpenCodeAccount: (id: string) => hubClient.deleteAccount(id),
+  testOpenCodeAccount: (id: string) => hubClient.testAccount(id),
+  syncUsage: (id: string) => hubClient.syncUsage(id),
+  syncProgress: (id: string) => invoke<SyncProgress>('get_sync_progress', { id }),
   getAllUsage: (offset = 0, limit = 50, accountId?: string) =>
-    isTauri()
-      ? hubClient.getUsage({ offset, limit, account_id: accountId || null })
-      : rest<UsageResponse>(
-          'GET',
-          `/usage/all?offset=${offset}&limit=${limit}${
-            accountId ? `&account_id=${encodeURIComponent(accountId)}` : ''
-          }`,
-        ),
-
-  getDailyStats: async (days = 30, accountId?: string) => {
-    if (!isTauri()) {
-      return rest<{ days: number; stats: DailyStat[] }>(
-        'GET',
-        `/analytics/opencode/daily?days=${days}${
-          accountId ? `&account_id=${encodeURIComponent(accountId)}` : ''
-        }`,
-      );
-    }
-    const stats = await hubClient.getDailyStats({ days, account_id: accountId || null });
-    return { days, stats };
-  },
-
-  getDailyModelStats: async (days = 30, accountId?: string) => {
-    if (!isTauri()) {
-      return rest<{ days: number; stats: DailyModelStat[] }>(
-        'GET',
-        `/analytics/opencode/daily/models?days=${days}${
-          accountId ? `&account_id=${encodeURIComponent(accountId)}` : ''
-        }`,
-      );
-    }
-    const stats = await hubClient.getDailyModelStats({ days, account_id: accountId || null });
-    return { days, stats };
-  },
-
-  getModelTokenStats: async (days = 30, accountId?: string) => {
-    if (!isTauri()) {
-      return rest<{ days: number; stats: ModelTokenStat[] }>(
-        'GET',
-        `/analytics/opencode/model-tokens?days=${days}${
-          accountId ? `&account_id=${encodeURIComponent(accountId)}` : ''
-        }`,
-      );
-    }
-    const stats = await hubClient.getModelStats({ days, account_id: accountId || null });
-    return { days, stats };
-  },
-
-  getSettings: () =>
-    isTauri()
-      ? hubClient.getSettings()
-      : Promise.resolve<AppSettings>({ theme: 'system', language: 'system' }),
-
-  updateSettings: (input: Partial<AppSettings>) =>
-    isTauri()
-      ? hubClient.updateSettings(input)
-      : Promise.resolve<AppSettings>({
-          theme: input.theme || 'system',
-          language: input.language || 'system',
-        }),
+    hubClient.getUsage({ offset, limit, account_id: accountId || null }),
+  getDailyStats: async (days = 30, accountId?: string) => ({
+    days,
+    stats: await hubClient.getDailyStats({ days, account_id: accountId || null }),
+  }),
+  getDailyModelStats: async (days = 30, accountId?: string) => ({
+    days,
+    stats: await hubClient.getDailyModelStats({ days, account_id: accountId || null }),
+  }),
+  getModelTokenStats: async (days = 30, accountId?: string) => ({
+    days,
+    stats: await hubClient.getModelStats({ days, account_id: accountId || null }),
+  }),
+  getSettings: () => hubClient.getSettings(),
+  updateSettings: (input: Partial<AppSettings>) => hubClient.updateSettings(input),
 };

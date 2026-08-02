@@ -30,11 +30,6 @@ ts-rs = { version = "12.0.1", features = ["chrono-impl", "uuid-impl"] }
 url = "2"
 uuid = { version = "1", features = ["v4", "serde"] }
 
-[target.'cfg(target_os = "windows")'.dependencies]
-tauri-plugin-keyring-store = { version = "0.2.0", default-features = false }
-proxyparser = "0.1.0"
-systemproxy = "0.3.5"
-
 [target.'cfg(target_os = "android")'.dependencies]
 # reqwest's default rustls backend uses rustls-platform-verifier, which panics on
 # Android unless the optional JNI/Kotlin verifier is wired up. Use Mozilla roots

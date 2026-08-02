@@ -1,14 +1,9 @@
-#[cfg(not(any(target_os = "windows", target_os = "android")))]
-compile_error!("68HUB supports Windows and Android only");
-
 mod commands;
 mod database;
 mod error;
 mod models;
 mod opencode;
 mod proxy;
-#[cfg(any(target_os = "android", test))]
-#[allow(dead_code)]
 mod secret_file;
 mod secrets;
 mod sync;
@@ -22,18 +17,7 @@ use tauri::Manager;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let mut builder = tauri::Builder::default();
-
-    #[cfg(not(target_os = "android"))]
-    {
-        builder = builder.plugin(
-            tauri_plugin_keyring_store::Builder::new()
-                .service("com.hub68.v2.credentials")
-                .build(),
-        );
-    }
-
-    builder
+    tauri::Builder::default()
         .setup(|app| {
             let data_dir = app.path().app_data_dir()?;
             let database = Database::open(&data_dir.join("68hub-v2.db"))
@@ -64,21 +48,23 @@ pub fn run() {
         .build(tauri::generate_context!())
         .expect("failed to build 68HUB")
         .run(|app, event| {
-            let exit_requested = matches!(&event, tauri::RunEvent::ExitRequested { .. });
-            #[cfg(target_os = "android")]
-            let app_suspended = matches!(
-                &event,
-                tauri::RunEvent::WindowEvent {
-                    event: tauri::WindowEvent::Suspended,
-                    ..
-                }
-            );
             #[cfg(not(target_os = "android"))]
-            let app_suspended = false;
+            let _ = (&app, &event);
 
-            if exit_requested || app_suspended {
-                if let Some(state) = app.try_state::<AppState>() {
-                    state.sync.cancel_all();
+            #[cfg(target_os = "android")]
+            {
+                let exit_requested = matches!(&event, tauri::RunEvent::ExitRequested { .. });
+                let app_suspended = matches!(
+                    &event,
+                    tauri::RunEvent::WindowEvent {
+                        event: tauri::WindowEvent::Suspended,
+                        ..
+                    }
+                );
+                if exit_requested || app_suspended {
+                    if let Some(state) = app.try_state::<AppState>() {
+                        state.sync.cancel_all();
+                    }
                 }
             }
         });

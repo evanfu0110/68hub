@@ -7,8 +7,6 @@ pub enum AppError {
     Authentication(String),
     #[error("network request failed: {0}")]
     Network(String),
-    #[error("system proxy resolution failed: {0}")]
-    ProxyResolution(String),
     #[error("OpenCode response format changed: {0}")]
     UpstreamFormat(String),
     #[error("database operation failed: {0}")]
@@ -52,7 +50,6 @@ impl Serialize for AppError {
         let (code, retryable) = match self {
             Self::Authentication(_) => ("AUTHENTICATION", false),
             Self::Network(_) => ("NETWORK", true),
-            Self::ProxyResolution(_) => ("PROXY_RESOLUTION", true),
             Self::UpstreamFormat(_) => ("UPSTREAM_FORMAT", false),
             Self::Database(_) => ("DATABASE", true),
             Self::SecretStore(_) => ("SECRET_STORE", false),

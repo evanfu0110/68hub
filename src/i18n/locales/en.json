@@ -223,16 +223,15 @@
     "syncDone": "Sync complete, added {{count}} records",
     "cookieGuide": {
       "title": "How to get the Auth Cookie",
-      "windows": "1. Sign in to opencode.ai in your browser\n2. Press F12 and open Application → Cookies\n3. Select https://opencode.ai and copy the auth value\n4. Add an account in 68HUB and paste it. Never share this Cookie.",
       "android": "1. Sign in to opencode.ai in a trusted desktop browser and obtain the auth Cookie\n2. Transfer it to your phone using your own secure method\n3. Add an account in 68HUB and paste it\n4. Clear the clipboard afterwards and never share the Cookie."
     }
   },
   "about": {
     "title": "About 68HUB",
     "version": "v{{version}} · OpenCode Go Usage Dashboard",
-    "desc1": "68HUB is a local usage statistics desktop app designed for OpenCode Go affordable Coding Plans.",
+    "desc1": "68HUB is a local Android usage dashboard designed for OpenCode Go affordable Coding Plans.",
     "desc2": "OpenCode AI's official usage pages have scattered data and cumbersome operations, making it hard to grasp each model's token consumption and account quota status at a glance. 68HUB periodically syncs data through its backend, displaying key metrics with clear charts and layouts.",
-    "download": "Download Latest Version",
+    "download": "Open Project Homepage",
     "features": "Features",
     "feature1": "Multi-account real-time quota monitoring (5h / 7d / 30d)",
     "feature2": "Model token consumption ranking and daily trends",
@@ -240,8 +239,8 @@
     "feature4": "Auto-sync data, no manual refresh needed",
     "techStack": "Tech Stack",
     "thanks": "Acknowledgments",
-    "thanksText": "Backend inspiration from QuotaHub, rewritten as Hono + better-sqlite3 embedded in Electron main process,告别双进程打包.",
-    "localFirst": "Version 2.0 uses a local Tauri and Rust core for Windows, Intel Mac, and Android, with no localhost HTTP service.",
+    "thanksText": "This project is adapted from evanfu0110/68hub and uses a Tauri 2 + Rust local core for Android. Many thanks to Evan Fu for the original open-source project and foundation!",
+    "localFirst": "The Android version uses a local Tauri and Rust core. Data stays on this device and no localhost HTTP service is started.",
     "checking": "Checking for updates...",
     "latest": "You have the latest version",
     "newVersion": "New version v{{version}} available",
@@ -249,18 +248,12 @@
     "checkFailed": "Unable to check for updates",
     "contact": "Contact"
   },
-  "titleBar": {
-    "closeDialogTitle": "When closing window...",
-    "closeDialogDesc": "You can minimize the app to the system tray and continue syncing data in the background.",
-    "minimizeToTray": "Minimize to Tray",
-    "quitApp": "Quit App"
-  },
   "onboarding": {
     "welcome": "Welcome to 68HUB",
     "subtitle": "Choose your preferred appearance and system behavior",
     "themeLabel": "Interface Theme",
-    "tray": "Minimize to System Tray",
-    "trayDesc": "Hide to tray when closing window instead of quitting",
+    "tray": "Background operation",
+    "trayDesc": "Android system background behavior manages sync tasks",
     "start": "Get Started",
     "localTitle": "Data stays on this device",
     "localDesc": "Account Cookies use the system secure store and usage history stays in local SQLite. There is no cloud account or background resident service."

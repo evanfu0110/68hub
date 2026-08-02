@@ -14,13 +14,11 @@
     "windows": [
       {
         "title": "68HUB",
-        "width": 1100,
-        "height": 720,
-        "minWidth": 360,
-        "minHeight": 640,
-        "resizable": true,
+        "width": 360,
+        "height": 640,
+        "resizable": false,
         "fullscreen": false,
-        "decorations": true
+        "decorations": false
       }
     ],
     "security": {
@@ -29,17 +27,11 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["nsis"],
     "createUpdaterArtifacts": false,
     "icon": [
       "../public/icon.png",
       "../public/icon.ico"
     ],
-    "windows": {
-      "nsis": {
-        "installMode": "currentUser"
-      }
-    },
     "android": {
       "minSdkVersion": 28
     }

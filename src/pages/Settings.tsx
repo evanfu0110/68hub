@@ -8,12 +8,6 @@ import { useToast } from '../components/Toast';
 
 const emptyForm = { name: '', auth_cookie: '', workspace_id: 'Default' };
 
-function currentPlatform(): 'android' | 'windows' {
-  const agent = navigator.userAgent.toLowerCase();
-  if (agent.includes('android')) return 'android';
-  return 'windows';
-}
-
 export function Settings() {
   const { t, i18n } = useTranslation();
   const { theme, setTheme } = useTheme();
@@ -32,7 +26,7 @@ export function Settings() {
     api.getSettings().then((value) => setSettings(value)).catch(() => {});
   }, []);
 
-  const guideKey = useMemo(() => `settings.cookieGuide.${currentPlatform()}`, []);
+  const guideKey = useMemo(() => 'settings.cookieGuide.android', []);
 
   const savePreferences = async (next: Partial<AppSettings>) => {
     const updated = await api.updateSettings(next);

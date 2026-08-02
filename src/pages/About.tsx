@@ -33,7 +33,7 @@ export function About() {
         </div>
       </section>
 
-      <button className="btn btn-primary w-full" onClick={() => openLink('https://github.com/evanfu0110/68hub')}>
+      <button className="btn btn-primary w-full" onClick={() => openLink('https://github.com/h6161236-spec/68hub')}>
         {t('about.download')}
       </button>
     </div>
