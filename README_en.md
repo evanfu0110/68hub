@@ -8,6 +8,8 @@
 
 ---
 
+> This project is adapted from [evanfu0110/68hub](https://github.com/evanfu0110/68hub/), with a Tauri 2 + Rust local core, Android mobile support, and touch interactions added. Many thanks to Evan Fu for the original open-source project and foundation!
+
 <p align="center">
   <img src="./assets/readme/section-preview.svg" width="100%" alt="Screenshots">
 </p>

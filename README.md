@@ -8,6 +8,8 @@
 
 ---
 
+> 本项目基于 [evanfu0110/68hub](https://github.com/evanfu0110/68hub/) 二次开发，新增了 Tauri 2 + Rust 本地核心、Android 移动端支持和触摸交互。感谢原作者 Evan Fu 的开源项目与基础实现！
+
 <p align="center">
   <img src="./assets/readme/section-preview.svg" width="100%" alt="预览 Screenshots">
 </p>
