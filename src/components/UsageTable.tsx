@@ -104,7 +104,12 @@ export function UsageTable({ records, showAccount }: UsageTableProps) {
             records.map((r) => (
               <tr key={r.usg_id} className="hover">
                 {showAccount && (
-                  <td className="text-sm text-base-content/70">{r.account_name || '-'}</td>
+                  <td
+                    className="text-sm text-base-content/70 max-w-[10rem] truncate"
+                    title={r.account_name}
+                  >
+                    {r.account_name || '-'}
+                  </td>
                 )}
                 <td className="text-sm text-base-content/60 tabular-nums">{formatTime(r.created_at)}</td>
                 <td className="text-sm font-medium">

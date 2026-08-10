@@ -21,7 +21,7 @@ function cmpVersion(a: string, b: string): number {
 
 export function About() {
   const { t } = useTranslation();
-  const [version, setVersion] = useState('1.1.3');
+  const [version, setVersion] = useState('1.1.4');
   const [latestVersion, setLatestVersion] = useState<string | null>(null);
   const [checkStatus, setCheckStatus] = useState<'checking' | 'latest' | 'outdated' | 'dev' | 'error'>('checking');
 

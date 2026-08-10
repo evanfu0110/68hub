@@ -1,10 +1,35 @@
 <p align="center">
-  <img src="./assets/readme/hero.svg" width="100%" alt="68HUB — OpenCode Go Usage Dashboard">
+  <img src="./assets/readme/hero.svg" width="88%" alt="68HUB — OpenCode Go Usage Dashboard">
 </p>
 
 <p align="center">
-  <a href="./README.md"><img src="./assets/readme/lang-en.svg" width="100%" alt="Switch to 中文"></a>
+  <a href="./README.md">🌐 中文</a>
 </p>
+
+<p align="center">
+  <img src="https://img.shields.io/github/stars/evanfu0110/68hub?style=flat-square&label=Stars&color=4B6BFB" alt="GitHub Stars">
+  <img src="https://img.shields.io/github/v/release/evanfu0110/68hub?style=flat-square&label=Release&color=2E9E6B" alt="Latest Release">
+  <img src="https://img.shields.io/github/license/evanfu0110/68hub?style=flat-square&label=License&color=E85642" alt="License">
+  <img src="https://img.shields.io/badge/Platform-Windows%20x64-64748B?style=flat-square" alt="Platform">
+</p>
+
+**68HUB** is an Electron-based dashboard for OpenCode Go usage: multi-account quotas, token consumption, daily trends and usage records at a glance — all data stays on your machine.
+
+---
+
+<p align="center">
+  <img src="./assets/readme/section-derived.svg" width="100%" alt="Derived Projects">
+</p>
+
+Community projects forked from 68HUB (ordered by creation date):
+
+| Project | Platform | Highlights |
+|---------|----------|------------|
+| [OCGoQuota](https://github.com/h6161236-spec/OCGoQuota) | 📱 Android | Tauri 2 + Rust local core, encrypted cookie storage, pull-to-refresh, no cloud dependency |
+| [68hub (fuyu1993)](https://github.com/fuyu1993/68hub) | 🖥️ Windows | Chart overhaul: stacked token bar chart, multi-series trend lines, daily cost & request analysis |
+| [OpenCodeBoard](https://github.com/KDB-Wind/opencodeboard) | 🖥️ Windows | Personal-use branch, upgraded to Electron 43, model filtering in token stats, independent releases |
+
+Thanks to every contributor who forked and improved this project. Feel free to build your own under the MIT license.
 
 ---
 
@@ -14,7 +39,7 @@
 
 | Page | Preview |
 |------|---------|
-| 📊 **Usage Dashboard** | ![Dashboard](Preview%20Photo/1.png) |
+| 📊 **Dashboard** | ![Dashboard](Preview%20Photo/1.png) |
 | 📈 **Token Stats** | ![Token Stats](Preview%20Photo/2.png) |
 | 📅 **Daily Trends** | ![Daily Trends](Preview%20Photo/3.png) |
 | ⚙️ **Settings** | ![Settings](Preview%20Photo/5.png) |
@@ -33,6 +58,14 @@
 | ℹ️ **About** | Contact info and tech stack |
 
 <p align="center">
+  <img src="./assets/readme/section-accounts.svg" width="100%" alt="Multi-Account Support">
+</p>
+
+- **Quota**: Each account independently displays 5h/7d/30d progress bars
+- **Charts**: All account data aggregated, filterable by account
+- **Control**: Each account can be individually enabled/disabled
+
+<p align="center">
   <img src="./assets/readme/section-quickstart.svg" width="100%" alt="Quick Start">
 </p>
 
@@ -48,14 +81,6 @@ pnpm dev:vite
 ```
 
 > The embedded backend starts automatically with the Electron main process (Hono + better-sqlite3), no need to start a separate Python service.
-
-<p align="center">
-  <img src="./assets/readme/section-accounts.svg" width="100%" alt="Multi-Account Support">
-</p>
-
-- **Quota**: Each account independently displays 5h/7d/30d progress bars
-- **Charts**: All account data aggregated, filterable by account
-- **Control**: Each account can be individually enabled/disabled
 
 <p align="center">
   <img src="./assets/readme/section-tech.svg" width="100%" alt="Tech Stack">
@@ -121,3 +146,5 @@ Output: `release\68HUB Setup <version>.exe`
 <p align="center">
   <img src="./assets/readme/section-license.svg" width="100%" alt="License MIT">
 </p>
+
+[MIT](LICENSE) © 68HUB

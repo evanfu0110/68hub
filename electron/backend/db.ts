@@ -581,7 +581,7 @@ export function listAllUsageRecords(opts: {
 
 export function opencodeDailyStats(days = 30, accountId?: string | null): Record<string, unknown>[] {
   days = Math.max(1, Math.min(days, 365));
-  let where = "WHERE substr(created_at, 1, 10) >= date('now', ?)";
+  let where = "WHERE substr(datetime(created_at, 'localtime'), 1, 10) >= date('now', 'localtime', ?)";
   const params: unknown[] = [`-${days} days`];
   if (accountId) {
     where += ' AND account_id = ?';
@@ -589,7 +589,7 @@ export function opencodeDailyStats(days = 30, accountId?: string | null): Record
   }
   const rows = getDb()
     .prepare(
-      `SELECT substr(created_at, 1, 10) AS date,
+      `SELECT substr(datetime(created_at, 'localtime'), 1, 10) AS date,
               SUM(cost_usd) AS total_cost_usd,
                COUNT(*) AS request_count,
                SUM(input_tokens + cache_read_tokens + cache_write_5m_tokens + cache_write_1h_tokens) AS total_input_tokens,
@@ -599,7 +599,7 @@ export function opencodeDailyStats(days = 30, accountId?: string | null): Record
                SUM(output_tokens) AS total_output_tokens
        FROM usage_records
        ${where}
-       GROUP BY substr(created_at, 1, 10)
+       GROUP BY substr(datetime(created_at, 'localtime'), 1, 10)
        ORDER BY date DESC`,
     )
     .all(...params) as Record<string, unknown>[];
@@ -620,7 +620,7 @@ export function opencodeDailyModelStats(
   accountId?: string | null,
 ): Record<string, unknown>[] {
   days = Math.max(1, Math.min(days, 365));
-  let where = "WHERE substr(created_at, 1, 10) >= date('now', ?)";
+  let where = "WHERE substr(datetime(created_at, 'localtime'), 1, 10) >= date('now', 'localtime', ?)";
   const params: unknown[] = [`-${days} days`];
   if (accountId) {
     where += ' AND account_id = ?';
@@ -628,7 +628,7 @@ export function opencodeDailyModelStats(
   }
   const rows = getDb()
     .prepare(
-      `SELECT substr(created_at, 1, 10) AS date,
+      `SELECT substr(datetime(created_at, 'localtime'), 1, 10) AS date,
               model,
               SUM(cost_usd) AS total_cost_usd,
               COUNT(*) AS request_count,
@@ -639,7 +639,7 @@ export function opencodeDailyModelStats(
               SUM(output_tokens) AS total_output_tokens
        FROM usage_records
        ${where}
-       GROUP BY substr(created_at, 1, 10), model
+       GROUP BY substr(datetime(created_at, 'localtime'), 1, 10), model
        ORDER BY date ASC, model ASC`,
     )
     .all(...params) as Record<string, unknown>[];
@@ -769,7 +769,7 @@ export function opencodeModelTokenStats(
   if (period === '5h') {
     clauses.push("datetime(created_at) >= datetime('now', '-5 hours')");
   } else if (period === 'today') {
-    clauses.push("substr(created_at, 1, 10) = date('now')");
+    clauses.push("substr(datetime(created_at, 'localtime'), 1, 10) = date('now', 'localtime')");
   } else if (period !== 'all') {
     const days = Math.max(1, Number(/^(\d+)d$/.exec(period)?.[1] ?? 30));
     clauses.push("datetime(created_at) >= datetime('now', ?)");

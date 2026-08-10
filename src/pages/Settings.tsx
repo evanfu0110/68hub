@@ -426,7 +426,12 @@ export function Settings() {
                     className={`w-2 h-2 rounded-full shrink-0 ${account.enabled ? 'bg-success' : 'bg-base-content/30'}`}
                   />
                   <div className="min-w-0">
-                    <div className="text-sm font-medium truncate text-base-content">{account.name}</div>
+                    <div
+                      className="text-sm font-medium truncate text-base-content"
+                      title={account.name}
+                    >
+                      {account.name}
+                    </div>
                     <div className="text-xs text-base-content/50 font-mono truncate">
                       {account.auth_cookie_masked || '-'}
                     </div>

@@ -7,9 +7,9 @@
     "dashboard": "Dashboard",
     "tokens": "Stats",
     "daily": "Daily",
-    "records": "Records",
-    "settings": "Settings",
-    "about": "About"
+      "records": "Records",
+      "settings": "Settings",
+      "about": "About"
   },
   "common": {
     "loading": "Loading...",
@@ -53,7 +53,7 @@
     "avgRemainingRatio": "Avg Remaining Ratio",
     "totalTokenConsumption": "Total Token Consumption",
     "todayTokenUsage": "Today's Tokens",
-    "todayTokenDesc": "UTC calendar day",
+    "todayTokenDesc": "Local calendar day",
     "requests": "{{count}} Requests",
     "accountQuotaStatus": "Account Quota Status",
     "modelTop3": "Top 3 Models",

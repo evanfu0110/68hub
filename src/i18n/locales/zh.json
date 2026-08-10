@@ -7,9 +7,9 @@
     "dashboard": "总览",
     "tokens": "统计",
     "daily": "每日",
-    "records": "记录",
-    "settings": "设置",
-    "about": "关于"
+      "records": "记录",
+      "settings": "设置",
+      "about": "关于"
   },
   "common": {
     "loading": "加载中...",
@@ -53,7 +53,7 @@
     "avgRemainingRatio": "平均剩余比例",
     "totalTokenConsumption": "总 Token 消耗",
     "todayTokenUsage": "今日 Token 使用",
-    "todayTokenDesc": "UTC 自然日",
+    "todayTokenDesc": "本地自然日",
     "requests": "{{count}} 次请求",
     "accountQuotaStatus": "账户配额状态",
     "modelTop3": "模型用量 Top 3",

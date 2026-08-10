@@ -1,29 +1,23 @@
 # 68HUB Changelog
 
-## v1.1.3
+## v1.1.4
 
 ### 更新 / Updates
 
-- 重构统计页，整合汇总卡片、模型排行与用量趋势。
-  Reworked the Stats page with summary cards, model ranking and usage trends.
-- 统一全站时间选择为今天、近 7 天、近 30 天和全部，并持久化最近选择。
-  Unified time ranges to Today, 7 Days, 30 Days and All, with the latest choice persisted.
-- 每日页支持日期导航、按模型查看 Token 明细及缓存 Token/缓存率。
-  Added date navigation and per-model input, output, cache token and cache rate details.
-- Dashboard 增加今日 Token 使用量，模型 Top 3 支持时间段切换。
-  Added today's token usage to the Dashboard and period switching for the Top 3 models.
-- 模型 Token 图表使用对数比例，并根据模型数量调整输入/输出柱间距。
-  Added logarithmic model token charts with adaptive input/output bar spacing.
-- 后端端口冲突时自动寻找可用端口，前端自动连接实际端口。
-  The backend now finds an available port automatically and the frontend connects to it.
+- 模型图标改用本地 `@lobehub/icons` 组件：支持品牌彩色（Color）与单色（Mono）显示，不再依赖 Simple Icons CDN 和 Google favicon 外网加载。
+  Model icons now use local `@lobehub/icons` components with brand color (Color) and mono variants, removing Simple Icons CDN and Google favicon dependencies.
 
 ### 修复 / Fixes
 
-- 修复时间范围或账户切换后数据未即时刷新的问题。
-  Fixed data not refreshing immediately after changing the time range or account.
-- 修复模型图表柱状图在极端 Token 数量级下不可见的问题。
-  Fixed model bars becoming invisible across extreme token magnitudes.
-- 修复时间选择器、费用/请求切换器选中态对比度不足的问题。
-  Improved contrast for time range and cost/request selectors.
-- 修复图表 Y 轴单位被裁切及输入/输出柱间距过大的问题。
-  Fixed clipped Y-axis units and excessive input/output bar spacing.
+- 修复用量费用显示偏低 10 倍的问题：OpenCode 用量 API 的 `cost` 字段单位为 1e-8 USD，此前按 1e-9 换算，导致所有费用仅为真实值的 1/10；应用启动时会自动按原始 `cost_raw` 修正存量数据。
+  Fixed usage costs being underreported by 10x: the API `cost` field is in 1e-8 USD but was divided by 1e9; existing records are auto-migrated from `cost_raw` on startup.
+  （本项修复来自 PR #6，由 KDB-Wind 提供 / Provided by KDB-Wind via PR #6）
+
+- 修复按天统计按 UTC 分天、与 OpenCode Go 网页（本地时区）每日总额不一致的问题：日统计分组、“今天”过滤及前端日期标签改为跟随电脑本地时区。
+  Fixed daily stats being bucketed by UTC so daily totals mismatch the Go console; day grouping, the "today" filter and frontend date labels now follow the computer's local timezone.
+
+- 修复前端一处类型检查报错（ModelRankChart 图表 Tooltip 存在未使用参数）。
+  Fixed a frontend type-check error (unused parameter in the ModelRankChart tooltip).
+
+- 设置页账户列表与用量记录表格中的账户名称过长时自动截断，悬停可查看完整名称。
+  Long account names are now truncated in the settings account list and usage records table, with the full name shown on hover.

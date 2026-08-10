@@ -1,33 +1,52 @@
-import { OpenAIIcon } from './OpenAIIcon';
+import {
+  Anthropic,
+  Cohere,
+  DeepSeek,
+  Google,
+  Grok,
+  Hunyuan,
+  Meta,
+  Microsoft,
+  Minimax,
+  Mistral,
+  Moonshot,
+  OpenAI,
+  Qwen,
+  XiaomiMiMo,
+  ZeroOne,
+  Zhipu,
+} from '@lobehub/icons';
+import type { IconType } from '@lobehub/icons';
 
-const map: [RegExp, string][] = [
-  [/qwen/i, 'qwen'],
-  [/deepseek/i, 'deepseek'],
-  [/kimi|k2|moonshot/i, 'moonshotai'],
-  [/glm|zhipu|chatglm/i, '__fallback__zhipuai.cn'],
-  [/mimo/i, 'xiaomi'],
-  [/minimax/i, 'minimax'],
-  [/gpt|o1|o3|chatgpt|openai|dall-e|whisper|tts|embed/i, 'openai'],
-  [/claude|anthropic/i, 'anthropic'],
-  [/gemini|gemma/i, 'google'],
-  [/llama|meta/i, 'meta'],
-  [/mistral/i, 'mistral'],
-  [/cohere|command/i, 'cohere'],
-  [/yi-/i, '01'],
-  [/phi/i, 'microsoft'],
-  [/grok/i, '__fallback__x.ai'],
+const map: [RegExp, IconType][] = [
+  [/qwen/i, Qwen.Color],
+  [/deepseek/i, DeepSeek.Color],
+  [/kimi|k2|moonshot/i, Moonshot],
+  [/glm|zhipu|chatglm/i, Zhipu.Color],
+  [/hy3|hunyuan/i, Hunyuan.Color],
+  [/mimo/i, XiaomiMiMo],
+  [/minimax/i, Minimax.Color],
+  [/gpt|o1|o3|chatgpt|openai|dall-e|whisper|tts|embed/i, OpenAI],
+  [/claude|anthropic/i, Anthropic],
+  [/gemini|gemma/i, Google.Color],
+  [/llama|meta/i, Meta.Color],
+  [/mistral/i, Mistral.Color],
+  [/cohere|command/i, Cohere.Color],
+  [/yi-/i, ZeroOne.Color],
+  [/phi/i, Microsoft.Color],
+  [/grok/i, Grok],
 ];
 
-function matchIcon(model: string): string | null {
-  for (const [re, slug] of map) {
-    if (re.test(model)) return slug;
+function matchIcon(model: string): IconType | null {
+  for (const [re, icon] of map) {
+    if (re.test(model)) return icon;
   }
   return null;
 }
 
 export function ModelIcon({ model, className = 'w-4 h-4' }: { model: string; className?: string }) {
-  const slug = matchIcon(model);
-  if (!slug) {
+  const Icon = matchIcon(model);
+  if (!Icon) {
     return (
       <svg viewBox="0 0 24 24" className={`${className} shrink-0`} aria-label={model} role="img">
         <circle cx="12" cy="12" r="9" fill="currentColor" opacity="0.18" />
@@ -36,30 +55,5 @@ export function ModelIcon({ model, className = 'w-4 h-4' }: { model: string; cla
     );
   }
 
-  if (slug === 'openai') {
-    return <OpenAIIcon className={className} />;
-  }
-
-  if (slug.startsWith('__fallback__')) {
-    const domain = slug.replace('__fallback__', '');
-    return (
-      <img
-        src={`https://www.google.com/s2/favicons?domain=${domain}&sz=16`}
-        className={`${className} shrink-0`}
-        alt={model}
-        title={model}
-        loading="lazy"
-      />
-    );
-  }
-
-  return (
-    <img
-      src={`https://cdn.simpleicons.org/${slug}`}
-      className={`${className} shrink-0`}
-      alt={model}
-      title={model}
-      loading="lazy"
-    />
-  );
+  return <Icon className={`${className} shrink-0`} aria-label={model} title={model} />;
 }

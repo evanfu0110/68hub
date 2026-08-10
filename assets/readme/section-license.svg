@@ -1,1 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="72" viewBox="0 0 1200 72" role="img" aria-labelledby="s-license-title"><title id="s-license-title">License</title><rect width="1200" height="72" rx="10" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/><rect x="0" y="0" width="4" height="72" rx="2" fill="#4b5563"/><circle cx="18" cy="24" r="5" fill="#4b5563"/><text x="38" y="30" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-serif" font-size="17" font-weight="700" fill="#1a1a2e">License</text><text x="38" y="54" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="13" fill="#94a3b8">MIT — Open source, free to use and modify</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="72" viewBox="0 0 1200 72" role="img" aria-labelledby="s-license-title">
+  <title id="s-license-title">License</title>
+  <style>
+    .bg { fill: #ffffff; stroke: #e2e8f0; }
+    .title { fill: #1a1a2e; }
+    .sub { fill: #94a3b8; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #1f2937; stroke: #374151; }
+      .title { fill: #f9fafb; }
+      .sub { fill: #9ca3af; }
+    }
+  </style>
+  <rect class="bg" width="1200" height="72" rx="10" stroke-width="1"/>
+  <rect x="0" y="0" width="4" height="72" rx="2" fill="#4b5563"/>
+  <circle cx="18" cy="24" r="5" fill="#4b5563"/>
+  <text class="title" x="38" y="30" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-serif" font-size="17" font-weight="700">License</text>
+  <text class="sub" x="38" y="54" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="13">MIT — Open source, free to use and modify</text>
+</svg>

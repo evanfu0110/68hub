@@ -97,7 +97,7 @@ export function ModelRankChart({ data, height = 320, compact }: ModelRankChartPr
             borderRadius: '8px',
             fontSize: '12px',
           }}
-          formatter={(value, name, item) => {
+          formatter={(_value, name, item) => {
             const rawValue = name === '输入' ? item.payload.rawInput : item.payload.rawOutput;
             return [formatTokens(rawValue), name === '输入' ? '输入' : '输出'];
           }}

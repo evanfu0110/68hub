@@ -3,7 +3,19 @@
      role="img" aria-labelledby="hero-title hero-desc">
   <title id="hero-title">68HUB — OpenCode Go 用量统计面板</title>
   <desc id="hero-desc">68HUB desktop dashboard for OpenCode Go token usage monitoring.</desc>
-  <rect width="1200" height="200" rx="16" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+  <style>
+    .bg { fill: #ffffff; stroke: #e2e8f0; }
+    .title { fill: #1a1a2e; }
+    .sub { fill: #475569; }
+    .sub2 { fill: #94a3b8; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #1f2937; stroke: #374151; }
+      .title { fill: #f9fafb; }
+      .sub { fill: #9ca3af; }
+      .sub2 { fill: #6b7280; }
+    }
+  </style>
+  <rect class="bg" width="1200" height="200" rx="16" stroke-width="1"/>
 
   <g transform="translate(56, 28)">
     <g transform="translate(0, 0) scale(0.09)">
@@ -39,9 +51,28 @@
       <path d="M864.8 667.5c0-167.9-157.5-304.1-351.8-304.1S161.2 499.6 161.2 667.5v-43.4C161.2 456.2 318.7 320 513 320s351.8 136.1 351.8 304.1" fill="#A81C0E"/>
     </g>
 
-    <text x="110" y="72" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-serif" font-size="56" font-weight="700" fill="#1a1a2e" letter-spacing="2">68HUB</text>
-    <text x="112" y="104" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-serif" font-size="18" fill="#475569" letter-spacing="1">OpenCode Go 用量统计面板</text>
-    <text x="112" y="128" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="14" fill="#94a3b8">Monitor token usage &amp; quota across accounts</text>
-    <text x="112" y="152" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" fill="#cbd5e1">Electron · React · TypeScript · Vite · Tailwind · daisyUI · Recharts · Hono · SQLite</text>
+    <text class="title" x="110" y="72" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-serif" font-size="56" font-weight="700" letter-spacing="2">68HUB</text>
+    <text class="sub" x="112" y="104" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-serif" font-size="18" letter-spacing="1">OpenCode Go 用量统计面板</text>
+    <text class="sub2" x="112" y="128" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="14">Monitor token usage &amp; quota across accounts</text>
+    <g>
+      <rect x="112" y="140" width="70" height="22" rx="11" fill="#47848F"/>
+      <text x="147" y="151" dominant-baseline="central" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5" font-weight="600" fill="#ffffff" letter-spacing="0.3">Electron</text>
+      <rect x="190" y="140" width="55" height="22" rx="11" fill="#0E7490"/>
+      <text x="217.5" y="151" dominant-baseline="central" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5" font-weight="600" fill="#ffffff" letter-spacing="0.3">React</text>
+      <rect x="253" y="140" width="85" height="22" rx="11" fill="#3178C6"/>
+      <text x="295.5" y="151" dominant-baseline="central" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5" font-weight="600" fill="#ffffff" letter-spacing="0.3">TypeScript</text>
+      <rect x="346" y="140" width="46" height="22" rx="11" fill="#646CFF"/>
+      <text x="369" y="151" dominant-baseline="central" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5" font-weight="600" fill="#ffffff" letter-spacing="0.3">Vite</text>
+      <rect x="400" y="140" width="72" height="22" rx="11" fill="#0891B2"/>
+      <text x="436" y="151" dominant-baseline="central" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5" font-weight="600" fill="#ffffff" letter-spacing="0.3">Tailwind</text>
+      <rect x="480" y="140" width="65" height="22" rx="11" fill="#5A0EF8"/>
+      <text x="512.5" y="151" dominant-baseline="central" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5" font-weight="600" fill="#ffffff" letter-spacing="0.3">daisyUI</text>
+      <rect x="553" y="140" width="73" height="22" rx="11" fill="#6A5ACD"/>
+      <text x="589.5" y="151" dominant-baseline="central" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5" font-weight="600" fill="#ffffff" letter-spacing="0.3">Recharts</text>
+      <rect x="634" y="140" width="55" height="22" rx="11" fill="#D9480F"/>
+      <text x="661.5" y="151" dominant-baseline="central" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5" font-weight="600" fill="#ffffff" letter-spacing="0.3">Hono</text>
+      <rect x="697" y="140" width="61" height="22" rx="11" fill="#003B57"/>
+      <text x="727.5" y="151" dominant-baseline="central" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5" font-weight="600" fill="#ffffff" letter-spacing="0.3">SQLite</text>
+    </g>
   </g>
 </svg>

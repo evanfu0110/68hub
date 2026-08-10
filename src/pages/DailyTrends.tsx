@@ -6,9 +6,9 @@ import { ModelIcon } from '../components/ModelIcon';
 import type { OpenCodeAccount } from '../api/types';
 
 const toDateStr = (d: Date) => {
-  const y = d.getUTCFullYear();
-  const m = String(d.getUTCMonth() + 1).padStart(2, '0');
-  const day = String(d.getUTCDate()).padStart(2, '0');
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
   return `${y}-${m}-${day}`;
 };
 
@@ -37,7 +37,7 @@ export function DailyTrends() {
   const today = useMemo(() => toDateStr(new Date()), []);
   const yesterday = useMemo(() => {
     const d = new Date();
-    d.setUTCDate(d.getUTCDate() - 1);
+    d.setDate(d.getDate() - 1);
     return toDateStr(d);
   }, []);
 
@@ -57,11 +57,13 @@ export function DailyTrends() {
     };
   }, [dayModels, selectedDate]);
 
-  const fmtDate = (s: string) =>
-    new Date(s + 'T00:00:00Z').toLocaleDateString(
+  const fmtDate = (s: string) => {
+    const [y, m, d] = s.split('-').map(Number);
+    return new Date(y, m - 1, d).toLocaleDateString(
       i18n.language === 'zh' ? 'zh-CN' : 'en-US',
       { year: 'numeric', month: 'short', day: 'numeric' },
     );
+  };
 
   const dateLabel =
     selectedDate === today
@@ -71,9 +73,13 @@ export function DailyTrends() {
       : fmtDate(selectedDate);
 
   const shiftDay = (delta: number) => {
-    const d = new Date(selectedDate + 'T00:00:00Z');
-    d.setUTCDate(d.getUTCDate() + delta);
-    setSelectedDate(toDateStr(d));
+    const [y, m, d] = selectedDate.split('-').map(Number);
+    const t = new Date(Date.UTC(y, m - 1, d));
+    t.setUTCDate(t.getUTCDate() + delta);
+    const yy = t.getUTCFullYear();
+    const mm = String(t.getUTCMonth() + 1).padStart(2, '0');
+    const dd = String(t.getUTCDate()).padStart(2, '0');
+    setSelectedDate(`${yy}-${mm}-${dd}`);
   };
 
   return (
