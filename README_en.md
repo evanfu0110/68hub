@@ -10,7 +10,7 @@
   <img src="https://img.shields.io/github/stars/evanfu0110/68hub?style=flat-square&label=Stars&color=4B6BFB" alt="GitHub Stars">
   <img src="https://img.shields.io/github/v/release/evanfu0110/68hub?style=flat-square&label=Release&color=2E9E6B" alt="Latest Release">
   <img src="https://img.shields.io/github/license/evanfu0110/68hub?style=flat-square&label=License&color=E85642" alt="License">
-  <img src="https://img.shields.io/badge/Platform-Windows%20x64-64748B?style=flat-square" alt="Platform">
+  <img src="https://img.shields.io/badge/Platform-Windows%20%C2%B7%20macOS-64748B?style=flat-square" alt="Platform">
 </p>
 
 **68HUB** is an Electron-based dashboard for OpenCode Go usage: multi-account quotas, token consumption, daily trends and usage records at a glance — all data stays on your machine.
@@ -89,7 +89,7 @@ pnpm dev:vite
 | Frontend | Backend | Tools |
 |----------|---------|-------|
 | Electron 31 | Hono + better-sqlite3 | electron-builder |
-| React 18 | TypeScript | Windows x64 |
+| React 18 | TypeScript | Windows · macOS |
 | Vite 5 + Tailwind 4 | zod | |
 | daisyUI 5 + Recharts | fetch (Node) | |
 
