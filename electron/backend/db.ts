@@ -223,6 +223,14 @@ export function initDb(): void {
       conn.exec(`ALTER TABLE usage_records ADD COLUMN ${column} INTEGER NOT NULL DEFAULT 0`);
     }
   }
+
+  // Migration: cost fields are in 1e-8 USD units. Older versions divided by 1e9,
+  // underreporting every cost by 10x. Recompute from the original integer cost_raw.
+  conn.exec(
+    `UPDATE usage_records
+     SET cost_usd = cost_raw / 100000000.0
+     WHERE ABS(cost_usd - cost_raw / 100000000.0) > 0.0000001`,
+  );
 }
 
 export function usageRecordToDict(r: UsageRecordRow): Record<string, unknown> {
