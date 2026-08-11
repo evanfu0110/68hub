@@ -25,7 +25,9 @@ Community projects forked from 68HUB (ordered by creation date):
 
 | Project | Platform | Highlights |
 |---------|----------|------------|
+| [68HUB Web Server Edition](https://github.com/1chenmm/opencode-go-usage) | 🌐 Web | Electron-free web deployment, Hono + better-sqlite3 backend, Docker / systemd one-click deploy, browser access |
 | [OCGoQuota](https://github.com/h6161236-spec/OCGoQuota) | 📱 Android | Tauri 2 + Rust local core, encrypted cookie storage, pull-to-refresh, no cloud dependency |
+| [OpenCodeQME](https://github.com/MOSSVENC/OpenCodeQME) | 🧩 Chrome / Edge | Standalone MV3 browser extension, toolbar popup + full detail page, IndexedDB local history, bilingual UI |
 | [OpenCodeBoard](https://github.com/KDB-Wind/opencodeboard) | 🖥️ Windows | Personal-use branch, upgraded to Electron 43, model filtering in token stats, independent releases |
 | [68HUB Android](https://github.com/moondrop12138/opencode-plan-manager) | 📱 Android | React Native + Expo port, UI and features aligned with the desktop app, auth cookie encrypted via KeyStore |
 

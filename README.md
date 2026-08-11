@@ -25,7 +25,9 @@
 
 | 项目 | 平台 | 说明 |
 |------|------|------|
+| [68HUB Web Server Edition](https://github.com/1chenmm/opencode-go-usage) | 🌐 Web | 移除 Electron 的纯 Web 部署版，Hono + better-sqlite3 后端，Docker / systemd 一键部署，浏览器访问 |
 | [OCGoQuota](https://github.com/h6161236-spec/OCGoQuota) | 📱 Android | Tauri 2 + Rust 本地核心，Cookie 加密存储，触摸下拉刷新，数据不依赖云端服务 |
+| [OpenCodeQME](https://github.com/MOSSVENC/OpenCodeQME) | 🧩 Chrome / Edge | 独立 MV3 浏览器扩展，工具栏小窗预览 + 独立详情页，IndexedDB 本地历史同步，中英文界面 |
 | [OpenCodeBoard](https://github.com/KDB-Wind/opencodeboard) | 🖥️ Windows | 个人使用向分支，升级 Electron 43，Token 统计支持模型筛选，独立打包发版 |
 | [68HUB 安卓端](https://github.com/moondrop12138/opencode-plan-manager) | 📱 Android | React Native + Expo 移植，UI 与功能对齐桌面端，Auth Cookie KeyStore 加密存储 |
 
