@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./assets/readme/hero.svg" width="88%" alt="68HUB — OpenCode Go 用量统计面板">
+  <img src="./assets/readme/hero.svg" width="100%" alt="68HUB — OpenCode Go 用量统计面板">
 </p>
 
 <p align="center">

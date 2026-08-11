@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg"
-     width="1200" height="200" viewBox="0 0 1200 200"
+     width="1200" height="300" viewBox="0 0 1200 300"
      role="img" aria-labelledby="hero-title hero-desc">
   <title id="hero-title">68HUB — OpenCode Go 用量统计面板</title>
   <desc id="hero-desc">68HUB desktop dashboard for OpenCode Go token usage monitoring.</desc>
@@ -15,10 +15,10 @@
       .sub2 { fill: #6b7280; }
     }
   </style>
-  <rect class="bg" width="1200" height="200" rx="16" stroke-width="1"/>
+  <rect class="bg" width="1200" height="300" rx="16" stroke-width="1"/>
 
-  <g transform="translate(56, 28)">
-    <g transform="translate(0, 0) scale(0.09)">
+  <g transform="translate(31.5, 28.5) scale(1.5)">
+    <g transform="translate(0, 36) scale(0.09)">
       <path d="M915.5 355C700.6 79.4 511.9 80.2 511.9 80.2S323.2 79.4 108.2 355C-0.8 494.8 244 497.7 511.9 466.8c267.7 30.9 512.5 28 403.6-111.8z" fill="#E85642"/>
       <path d="M744.7 499.1c-63.3 0-141.4-5.3-232.8-15.8-113.7 13.1-206.7 18.1-276.4 14.9-90.8-4.2-144-22.3-162.8-55.5-14.9-26.4-7.3-59.3 22.6-97.7C311.6 67.7 502 63.8 511.8 63.8h0.3c9.7 0 200.1 3.8 416.4 281.1 29.9 38.4 37.5 71.2 22.6 97.6-18.7 33.2-72 51.3-162.8 55.5-13.7 0.8-28.2 1.1-43.6 1.1z m-232.8-48.7l1.9 0.2c111.5 12.9 374.7 36.3 408.7-24 7.8-13.9 1.1-34.6-19.9-61.6-108.1-138.5-208.7-204.2-274.1-234.9-70.5-33-116.2-33.6-116.6-33.6-1.8 0-184.2 3.8-390.7 268.5-21.1 27-27.8 47.7-19.9 61.6 34 60.3 297.2 36.9 408.8 24l1.8-0.2z" fill="#A81C0E"/>
       <path d="M448.3 946c-770.2-8.1 0-821 0-821s51.7-40.6 127.4 0c0 0 770.2 812.8 0 821H448.3z" fill="#E85642"/>
