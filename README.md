@@ -153,8 +153,10 @@ pnpm dist
 
 ## Star History 星标趋势
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=evanfu0110/68hub&type=Date&theme=dark" />
-  <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=evanfu0110/68hub&type=Date" />
-  <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=evanfu0110/68hub&type=Date" />
-</picture>
+<a href="https://star-history.com/#evanfu0110/68hub&Date">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=evanfu0110%2F68hub&type=date&theme=dark&legend=top-left&sealed_token=7gwLH7-kXJqy9aUUS_Vc2a_q3sLpnJuv_fLVuWXyYGaOU0qiGYJLHdh_NC9VitA0OcqO5XhEpENPvJSBzJszLH0KBBnPeKRBoejWj_iOvr7a-rNti_gR3g79IgUcsTo-FCfbNEqEi5a1EjuPyjqUQY0xWdAPsThM9tJSQvb9gw9RfVM3S8hY2mHshEq5" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=evanfu0110%2F68hub&type=date&legend=top-left&sealed_token=7gwLH7-kXJqy9aUUS_Vc2a_q3sLpnJuv_fLVuWXyYGaOU0qiGYJLHdh_NC9VitA0OcqO5XhEpENPvJSBzJszLH0KBBnPeKRBoejWj_iOvr7a-rNti_gR3g79IgUcsTo-FCfbNEqEi5a1EjuPyjqUQY0xWdAPsThM9tJSQvb9gw9RfVM3S8hY2mHshEq5" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=evanfu0110%2F68hub&type=date&legend=top-left&sealed_token=7gwLH7-kXJqy9aUUS_Vc2a_q3sLpnJuv_fLVuWXyYGaOU0qiGYJLHdh_NC9VitA0OcqO5XhEpENPvJSBzJszLH0KBBnPeKRBoejWj_iOvr7a-rNti_gR3g79IgUcsTo-FCfbNEqEi5a1EjuPyjqUQY0xWdAPsThM9tJSQvb9gw9RfVM3S8hY2mHshEq5" />
+ </picture>
+</a>
