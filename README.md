@@ -26,8 +26,8 @@
 | 项目 | 平台 | 说明 |
 |------|------|------|
 | [OCGoQuota](https://github.com/h6161236-spec/OCGoQuota) | 📱 Android | Tauri 2 + Rust 本地核心，Cookie 加密存储，触摸下拉刷新，数据不依赖云端服务 |
-| [68hub (fuyu1993)](https://github.com/fuyu1993/68hub) | 🖥️ Windows | 图表改造：Token 堆叠柱状图、多系列趋势折线图，新增每日费用与请求量分析 |
 | [OpenCodeBoard](https://github.com/KDB-Wind/opencodeboard) | 🖥️ Windows | 个人使用向分支，升级 Electron 43，Token 统计支持模型筛选，独立打包发版 |
+| [68HUB 安卓端](https://github.com/moondrop12138/opencode-plan-manager) | 📱 Android | React Native + Expo 移植，UI 与功能对齐桌面端，Auth Cookie KeyStore 加密存储 |
 
 感谢所有二次开发作者的贡献，也欢迎基于 MIT 协议继续衍生你的版本。
 

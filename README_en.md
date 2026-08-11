@@ -26,8 +26,8 @@ Community projects forked from 68HUB (ordered by creation date):
 | Project | Platform | Highlights |
 |---------|----------|------------|
 | [OCGoQuota](https://github.com/h6161236-spec/OCGoQuota) | 📱 Android | Tauri 2 + Rust local core, encrypted cookie storage, pull-to-refresh, no cloud dependency |
-| [68hub (fuyu1993)](https://github.com/fuyu1993/68hub) | 🖥️ Windows | Chart overhaul: stacked token bar chart, multi-series trend lines, daily cost & request analysis |
 | [OpenCodeBoard](https://github.com/KDB-Wind/opencodeboard) | 🖥️ Windows | Personal-use branch, upgraded to Electron 43, model filtering in token stats, independent releases |
+| [68HUB Android](https://github.com/moondrop12138/opencode-plan-manager) | 📱 Android | React Native + Expo port, UI and features aligned with the desktop app, auth cookie encrypted via KeyStore |
 
 Thanks to every contributor who forked and improved this project. Feel free to build your own under the MIT license.
 
