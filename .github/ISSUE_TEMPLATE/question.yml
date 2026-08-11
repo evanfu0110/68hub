@@ -1,0 +1,31 @@
+name: 使用咨询 Question
+description: 提问或求助（提问前建议先查看 README / CHANGELOG）(Ask a question or get help)
+title: "[Question] "
+labels: [question]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### 说明 Note
+        提问前建议先查看 [README](https://github.com/evanfu0110/68hub#readme) 和 [CHANGELOG](https://github.com/evanfu0110/68hub/blob/main/CHANGELOG.md)，常见问题可能已有说明。
+  - type: textarea
+    id: question
+    attributes:
+      label: 问题描述 Question
+      description: 简洁清晰地描述你的疑问或遇到的问题
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: 版本与环境 Version / Platform
+      description: 例如 v1.1.4 / Windows 11
+    validations:
+      required: false
+  - type: textarea
+    id: tried
+    attributes:
+      label: 已尝试过的排查 Attempts
+      description: 已经尝试过哪些方法？结果如何？
+    validations:
+      required: false
