@@ -7,9 +7,9 @@
     "dashboard": "Dashboard",
     "tokens": "Stats",
     "daily": "Daily",
-      "records": "Records",
-      "settings": "Settings",
-      "about": "About"
+    "records": "Records",
+    "settings": "Settings",
+    "about": "About"
   },
   "common": {
     "loading": "Loading...",
@@ -68,7 +68,8 @@
     "allGood": "All accounts healthy, running normally",
     "mostConsumed": "Most consumed model is {{model}}, accounting for {{percent}}%",
     "noModelData": "Unable to fetch model usage data",
-    "heroTooltipTokens": "Tokens"
+    "heroTooltipTokens": "Tokens",
+    "quotaFetchWarning": "Failed to fetch quota ({{count}} account(s): {{accounts}}). The OpenCode page may have changed; please update the app or report it."
   },
   "tokenStats": {
     "title": "Usage Stats",

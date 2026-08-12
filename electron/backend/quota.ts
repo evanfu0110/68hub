@@ -45,6 +45,8 @@ export interface QuotaAccount {
   updated_at: string;
   windows: QuotaWindow[];
   error?: string;
+  stale?: boolean;
+  last_good_at?: string;
 }
 
 function quotaWindowToDict(w: QuotaWindow): Record<string, unknown> {
@@ -68,6 +70,8 @@ export function quotaAccountToDict(a: QuotaAccount): Record<string, unknown> {
     updated_at: a.updated_at,
   };
   if (a.error) payload.error = a.error;
+  if (a.stale) payload.stale = true;
+  if (a.last_good_at) payload.last_good_at = a.last_good_at;
   if (a.windows.length) payload.windows = a.windows.map(quotaWindowToDict);
   return payload;
 }
@@ -227,6 +231,10 @@ function filterWindows(windows: QuotaWindow[], account: AccountConfig): QuotaWin
   });
 }
 
+// Last-known-good quota per account, so a parse failure (e.g. the OpenCode
+// dashboard changed its bundle) degrades to stale data instead of a blank UI.
+const lastGoodQuota = new Map<string, { windows: QuotaWindow[]; fetchedAt: string }>();
+
 export async function fetchQuotaForAccount(
   account: AccountConfig,
   index: number,
@@ -288,15 +296,32 @@ export async function fetchQuotaForAccount(
     const windows = parseQuotaHtml(html, now);
     if (!windows.length) throw new Error('无法从 Dashboard HTML 解析额度数据');
 
+    const good = filterWindows(windows, account);
+    lastGoodQuota.set(account.id || account.name, { windows: good, fetchedAt: updatedAt });
     return {
       index,
       name: account.name,
       workspace_id: resolvedId,
       success: true,
       updated_at: updatedAt,
-      windows: filterWindows(windows, account),
+      windows: good,
     };
   } catch (exc) {
+    const error = String(exc instanceof Error ? exc.message : exc);
+    const cached = lastGoodQuota.get(account.id || account.name);
+    if (cached) {
+      return {
+        index,
+        name: account.name,
+        workspace_id: workspaceHint,
+        success: false,
+        updated_at: updatedAt,
+        windows: filterWindows(cached.windows, account),
+        error,
+        stale: true,
+        last_good_at: cached.fetchedAt,
+      };
+    }
     return {
       index,
       name: account.name,
@@ -304,7 +329,7 @@ export async function fetchQuotaForAccount(
       success: false,
       updated_at: updatedAt,
       windows: [],
-      error: String(exc instanceof Error ? exc.message : exc),
+      error,
     };
   }
 }

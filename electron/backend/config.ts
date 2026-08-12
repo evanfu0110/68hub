@@ -24,6 +24,7 @@ export const DEFAULT_SETTINGS_PAYLOAD: Record<string, unknown> = {
 };
 
 export interface AccountConfig {
+  id?: string;
   name: string;
   workspace_id: string;
   auth_cookie: string;

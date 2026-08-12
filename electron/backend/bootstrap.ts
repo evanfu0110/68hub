@@ -8,6 +8,7 @@ import {
   readOptionalRuntimeConfig,
   saveSettingsPayload,
 } from './config';
+import { encryptionAvailable, SECRET_PREFIX } from './secret-store';
 
 export function ensureSettingsMigrated(): void {
   if (db.hasServiceSettings()) return;
@@ -56,8 +57,31 @@ export function ensureAccountsImported(): void {
   }
 }
 
+// One-time upgrade: encrypt cookies that predate safeStorage support.
+// db accessors decrypt on read and encrypt on write, so the stored-value check
+// must read raw columns (decrypted rows would never show the v1: prefix).
+export function ensureSecretsEncrypted(): void {
+  if (!encryptionAvailable()) return;
+  const conn = db.getDb();
+  const opencode = conn
+    .prepare('SELECT id, auth_cookie FROM opencode_accounts')
+    .all() as { id: string; auth_cookie: string }[];
+  for (const row of opencode) {
+    if (!row.auth_cookie || row.auth_cookie.startsWith(SECRET_PREFIX)) continue;
+    db.updateOpencodeAccount(row.id, { auth_cookie: row.auth_cookie });
+  }
+  const ollama = conn
+    .prepare('SELECT id, session_cookie FROM ollama_accounts')
+    .all() as { id: string; session_cookie: string }[];
+  for (const row of ollama) {
+    if (!row.session_cookie || row.session_cookie.startsWith(SECRET_PREFIX)) continue;
+    db.updateOllamaAccount(row.id, { session_cookie: row.session_cookie });
+  }
+}
+
 export function ensureBootstrapped(): void {
   db.initDb();
   ensureSettingsMigrated();
   ensureAccountsImported();
+  ensureSecretsEncrypted();
 }

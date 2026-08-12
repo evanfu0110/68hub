@@ -43,6 +43,9 @@ export interface QuotaAccount {
   success: boolean;
   workspace_id: string;
   windows: QuotaWindow[];
+  error?: string;
+  stale?: boolean;
+  last_good_at?: string;
 }
 
 export interface Overview {

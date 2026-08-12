@@ -1,6 +1,7 @@
 import { app, BrowserWindow, ipcMain, Menu, nativeImage, shell, Tray } from 'electron';
 import path from 'path';
 import fs from 'fs';
+import { randomBytes } from 'crypto';
 import { startOpenCodeLogin } from './opencode-login';
 import {
   isBackendRunning,
@@ -21,6 +22,7 @@ let closeAllowed = false;
 
 const BACKEND_PORT = 8788;
 const BACKEND_HOST = '127.0.0.1';
+const BACKEND_TOKEN = randomBytes(32).toString('hex');
 let backendPort = BACKEND_PORT;
 
 function trayConfigPath(): string {
@@ -60,6 +62,7 @@ async function startBackend() {
       host: BACKEND_HOST,
       port: BACKEND_PORT,
       dataDir: backendDataDir(),
+      authToken: BACKEND_TOKEN,
     });
     backendPort = result.port;
   } catch (err) {
@@ -189,6 +192,10 @@ ipcMain.on('get-backend-port', (event) => {
   event.returnValue = backendPort;
 });
 
+ipcMain.on('get-backend-token', (event) => {
+  event.returnValue = BACKEND_TOKEN;
+});
+
 ipcMain.on('window-minimize', () => mainWindow?.minimize());
 ipcMain.on('window-maximize', () => {
   if (mainWindow?.isMaximized()) {
@@ -238,6 +245,7 @@ ipcMain.handle('restart-backend', async () => {
     host: BACKEND_HOST,
     port: BACKEND_PORT,
     dataDir: backendDataDir(),
+    authToken: BACKEND_TOKEN,
   });
   backendPort = result.port;
   return true;

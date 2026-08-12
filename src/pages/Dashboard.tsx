@@ -171,7 +171,8 @@ export function Dashboard() {
   );
 
   const overview = data?.overview?.opencode;
-  const quota = (data?.quota ?? []).filter((q) => q.success);
+  const quota = (data?.quota ?? []).filter((q) => q.success || (q.stale && (q.windows?.length ?? 0) > 0));
+  const failedQuota = (data?.quota ?? []).filter((q) => !q.success);
   const tokens = data?.model_tokens ?? [];
   const todayTokens = todayData?.stats ?? [];
   const topTokens = topData?.stats ?? [];
@@ -223,6 +224,17 @@ export function Dashboard() {
   return (
     <div className="space-y-4">
       <h1 className="text-lg font-bold">{t('dashboard.title')}</h1>
+
+      {failedQuota.length > 0 && (
+        <div className="alert alert-warning rounded-xl py-2.5 text-sm">
+          <span>
+            {t('dashboard.quotaFetchWarning', {
+              count: failedQuota.length,
+              accounts: failedQuota.map((q) => q.name).join('、'),
+            })}
+          </span>
+        </div>
+      )}
 
       <div className="grid grid-cols-4 gap-4">
         {hero.map((h) => (

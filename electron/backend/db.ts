@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { randomUUID } from 'crypto';
 import { dataDir } from './config';
+import { decryptSecret, encryptSecret, SECRET_PREFIX } from './secret-store';
 
 export interface OpenCodeAccountRow {
   id: string;
@@ -84,7 +85,7 @@ function mapOpenCode(row: Record<string, unknown>): OpenCodeAccountRow {
     name: String(row.name),
     workspace_id: String(row.workspace_id),
     resolved_workspace_id: row.resolved_workspace_id != null ? String(row.resolved_workspace_id) : null,
-    auth_cookie: String(row.auth_cookie),
+    auth_cookie: decryptSecret(String(row.auth_cookie)),
     show_rolling: Boolean(row.show_rolling),
     show_weekly: Boolean(row.show_weekly),
     show_monthly: Boolean(row.show_monthly),
@@ -98,7 +99,7 @@ function mapOllama(row: Record<string, unknown>): OllamaAccountRow {
   return {
     id: String(row.id),
     name: String(row.name),
-    session_cookie: String(row.session_cookie),
+    session_cookie: decryptSecret(String(row.session_cookie)),
     show_session: Boolean(row.show_session),
     show_weekly: Boolean(row.show_weekly),
     enabled: Boolean(row.enabled),
@@ -305,7 +306,7 @@ export function createOpencodeAccount(opts: {
       accountId,
       opts.name,
       opts.workspace_id,
-      opts.auth_cookie,
+      encryptSecret(opts.auth_cookie),
       opts.show_rolling !== false ? 1 : 0,
       opts.show_weekly !== false ? 1 : 0,
       opts.show_monthly !== false ? 1 : 0,
@@ -340,6 +341,9 @@ export function updateOpencodeAccount(
     let v = value;
     if (['show_rolling', 'show_weekly', 'show_monthly', 'enabled'].includes(key)) {
       v = value ? 1 : 0;
+    }
+    if (key === 'auth_cookie' && !String(v).startsWith(SECRET_PREFIX)) {
+      v = encryptSecret(String(v));
     }
     // allow null for resolved_workspace_id
     if (value === null && key !== 'resolved_workspace_id') continue;
@@ -395,7 +399,7 @@ export function createOllamaAccount(opts: {
     .run(
       accountId,
       opts.name,
-      opts.session_cookie,
+      encryptSecret(opts.session_cookie),
       opts.show_session !== false ? 1 : 0,
       opts.show_weekly !== false ? 1 : 0,
       opts.enabled !== false ? 1 : 0,
@@ -419,6 +423,9 @@ export function updateOllamaAccount(
     let v = value;
     if (['show_session', 'show_weekly', 'enabled'].includes(key)) {
       v = value ? 1 : 0;
+    }
+    if (key === 'session_cookie' && !String(v).startsWith(SECRET_PREFIX)) {
+      v = encryptSecret(String(v));
     }
     updates.push(`${key} = ?`);
     values.push(v);
