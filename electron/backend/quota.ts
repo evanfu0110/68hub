@@ -297,6 +297,9 @@ export async function fetchQuotaForAccount(
     if (!windows.length) throw new Error('无法从 Dashboard HTML 解析额度数据');
 
     const good = filterWindows(windows, account);
+    // id is preferred, but AccountConfig.id is optional and legacy import
+    // paths build accounts without it — fall back to name so the cache key
+    // stays stable across calls.
     lastGoodQuota.set(account.id || account.name, { windows: good, fetchedAt: updatedAt });
     return {
       index,

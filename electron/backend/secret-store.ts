@@ -39,10 +39,19 @@ export function decryptSecret(stored: string): string {
   if (!stored) return '';
   if (!stored.startsWith(SECRET_PREFIX)) return stored;
   const ss = safeStorage();
-  if (!ss || !encryptionAvailable()) return '';
+  if (!ss || !encryptionAvailable()) {
+    // Cookie would be silently lost here (e.g. system reinstall made the
+    // platform keyring/DPAPI unavailable). Log so the user has a chance to
+    // notice; never log the ciphertext itself.
+    console.warn('[secret-store] 加密不可用，v1: 密文无法解密，cookie 将丢失');
+    return '';
+  }
   try {
     return ss.decryptString(Buffer.from(stored.slice(SECRET_PREFIX.length), 'base64'));
-  } catch {
+  } catch (err) {
+    // Ciphertext corrupted or moved across machines. Fail visibly instead of
+    // silently wiping the account cookie.
+    console.warn('[secret-store] 解密失败，cookie 将丢失:', err);
     return '';
   }
 }
