@@ -7,9 +7,9 @@
     "dashboard": "总览",
     "tokens": "统计",
     "daily": "每日",
-      "records": "记录",
-      "settings": "设置",
-      "about": "关于"
+    "records": "记录",
+    "settings": "设置",
+    "about": "关于"
   },
   "common": {
     "loading": "加载中...",
@@ -68,7 +68,8 @@
     "allGood": "各账户额度充足，运行正常",
     "mostConsumed": "消耗最多的模型是 {{model}}，占比 {{percent}}%",
     "noModelData": "暂无法获取模型用量数据",
-    "heroTooltipTokens": "Tokens"
+    "heroTooltipTokens": "Tokens",
+    "quotaFetchWarning": "额度数据获取失败（{{count}} 个账户：{{accounts}}）。可能是 OpenCode 页面结构变更，请更新应用或反馈。"
   },
   "tokenStats": {
     "title": "用量统计",

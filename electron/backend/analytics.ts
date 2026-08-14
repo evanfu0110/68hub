@@ -165,6 +165,7 @@ export async function buildOverview(): Promise<Record<string, unknown>> {
   const ollamaRows = db.listOllamaAccounts(true);
 
   const opencodeAccountsCfg: AccountConfig[] = opencodeRows.map((row) => ({
+    id: row.id,
     name: row.name,
     workspace_id: row.workspace_id,
     auth_cookie: row.auth_cookie,

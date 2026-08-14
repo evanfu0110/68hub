@@ -1,5 +1,6 @@
 import { createServer, type Server } from 'http';
 import type { AddressInfo } from 'net';
+import { randomBytes } from 'crypto';
 import { getRequestListener } from '@hono/node-server';
 import { createApp } from './routes';
 import { ensureBootstrapped } from './bootstrap';
@@ -12,9 +13,11 @@ export interface BackendOptions {
   host?: string;
   port?: number;
   dataDir?: string;
+  authToken?: string;
 }
 
 let server: Server | null = null;
+let activeToken = '';
 let syncTimer: ReturnType<typeof setTimeout> | null = null;
 let syncRunning = false;
 let stopped = false;
@@ -82,14 +85,18 @@ export function restartUsageSyncTask() {
 export async function startBackendServer(opts: BackendOptions = {}): Promise<{
   host: string;
   port: number;
+  token: string;
 }> {
+  const token = opts.authToken || randomBytes(32).toString('hex');
   if (server) {
     const addr = server.address() as AddressInfo | null;
     return {
       host: opts.host || '127.0.0.1',
       port: addr?.port ?? opts.port ?? 8788,
+      token: activeToken || token,
     };
   }
+  activeToken = token;
 
   stopped = false;
   if (opts.dataDir) setDataDir(opts.dataDir);
@@ -100,7 +107,7 @@ export async function startBackendServer(opts: BackendOptions = {}): Promise<{
   const host = opts.host || service.listen_host || '127.0.0.1';
   const port = opts.port ?? service.listen_port ?? 8788;
 
-  const app = createApp({ onConfigUpdated: restartUsageSyncTask });
+  const app = createApp({ authToken: token, onConfigUpdated: restartUsageSyncTask });
   const listener = getRequestListener(app.fetch);
 
   let actualPort = port;
@@ -128,7 +135,7 @@ export async function startBackendServer(opts: BackendOptions = {}): Promise<{
 
   restartUsageSyncTask();
   console.log(`[backend] listening on http://${host}:${actualPort}`);
-  return { host, port: actualPort };
+  return { host, port: actualPort, token };
 }
 
 export async function stopBackendServer(): Promise<void> {

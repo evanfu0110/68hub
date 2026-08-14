@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { z } from 'zod';
+import { timingSafeEqual } from 'crypto';
 import fs from 'fs';
 import * as db from './db';
 import { ensureBootstrapped } from './bootstrap';
@@ -136,6 +137,7 @@ async function fetchQuotaForDashboard(): Promise<Record<string, unknown>[]> {
   const rows = db.listOpencodeAccounts(true);
   if (!rows.length) return [];
   const accounts: AccountConfig[] = rows.map((row) => ({
+    id: row.id,
     name: row.name,
     workspace_id: row.workspace_id,
     auth_cookie: row.auth_cookie,
@@ -153,8 +155,18 @@ async function fetchQuotaForDashboard(): Promise<Record<string, unknown>[]> {
 
 export type RestartSyncFn = () => void;
 
-export function createApp(opts: { onConfigUpdated?: RestartSyncFn } = {}): Hono {
+function tokenEquals(a: string, b: string): boolean {
+  const ba = Buffer.from(a);
+  const bb = Buffer.from(b);
+  return ba.length === bb.length && timingSafeEqual(ba, bb);
+}
+
+export function createApp(opts: {
+  authToken?: string;
+  onConfigUpdated?: RestartSyncFn;
+} = {}): Hono {
   const app = new Hono();
+  const authToken = opts.authToken || '';
 
   app.onError((err, c) => {
     if (err && typeof err === 'object' && 'issues' in err && Array.isArray((err as Record<string, unknown>).issues)) {
@@ -164,14 +176,27 @@ export function createApp(opts: { onConfigUpdated?: RestartSyncFn } = {}): Hono 
     return c.json({ detail: String(err instanceof Error ? err.message : err) }, 500);
   });
 
+  // Loopback-only service: only allow the app's own renderer origins (file:// in
+  // production, the Vite dev server in development). Anything else gets no CORS
+  // access, and every non-health endpoint additionally requires the per-run token.
   app.use(
     '*',
     cors({
-      origin: '*',
+      origin: ['null', 'http://localhost:5173', 'http://127.0.0.1:5173'],
       allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
       allowHeaders: ['*'],
     }),
   );
+
+  app.use('*', async (c, next) => {
+    if (c.req.path === '/api/health' || !authToken) return next();
+    const bearer = c.req.header('authorization') ?? '';
+    const headerToken = c.req.header('x-68hub-token') ?? '';
+    const authorized =
+      tokenEquals(bearer, `Bearer ${authToken}`) || tokenEquals(headerToken, authToken);
+    if (!authorized) return c.json({ detail: 'unauthorized' }, 401);
+    return next();
+  });
 
   app.get('/api/health', (c) => c.json({ status: 'ok' }));
 
@@ -273,6 +298,7 @@ export function createApp(opts: { onConfigUpdated?: RestartSyncFn } = {}): Hono 
     const row = db.getOpencodeAccount(c.req.param('accountId'));
     if (!row) return c.json({ detail: '账号不存在' }, 404);
     const account: AccountConfig = {
+      id: row.id,
       name: row.name,
       workspace_id: row.workspace_id,
       auth_cookie: row.auth_cookie,
@@ -392,6 +418,7 @@ export function createApp(opts: { onConfigUpdated?: RestartSyncFn } = {}): Hono 
     const rows = db.listOpencodeAccounts(true);
     if (!rows.length) return c.json([]);
     const accounts: AccountConfig[] = rows.map((row) => ({
+      id: row.id,
       name: row.name,
       workspace_id: row.workspace_id,
       auth_cookie: row.auth_cookie,

@@ -13,10 +13,20 @@ import type {
 const backendPort = typeof window !== 'undefined' && window.electronAPI?.getBackendPort
   ? window.electronAPI.getBackendPort()
   : 8788;
+const backendToken = typeof window !== 'undefined' && window.electronAPI?.getBackendToken
+  ? window.electronAPI.getBackendToken()
+  : '';
 const BASE = (import.meta.env.VITE_API_BASE || `http://127.0.0.1:${backendPort}`) + '/api';
 
+function authHeaders(extra?: Record<string, string>): Record<string, string> {
+  return {
+    ...(backendToken ? { Authorization: `Bearer ${backendToken}` } : {}),
+    ...extra,
+  };
+}
+
 async function get<T>(path: string): Promise<T> {
-  const res = await fetch(`${BASE}${path}`);
+  const res = await fetch(`${BASE}${path}`, { headers: authHeaders() });
   if (!res.ok) {
     const text = await res.text().catch(() => '');
     throw new Error(`${res.status} ${res.statusText}${text ? ': ' + text : ''}`);
@@ -35,7 +45,7 @@ async function put<T>(path: string, body?: unknown): Promise<T> {
 async function req<T>(method: string, path: string, body?: unknown): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
     method,
-    headers: body ? { 'Content-Type': 'application/json' } : undefined,
+    headers: authHeaders(body ? { 'Content-Type': 'application/json' } : undefined),
     body: body ? JSON.stringify(body) : undefined,
   });
   if (!res.ok) {
@@ -46,7 +56,7 @@ async function req<T>(method: string, path: string, body?: unknown): Promise<T> 
 }
 
 async function del<T>(path: string): Promise<T> {
-  const res = await fetch(`${BASE}${path}`, { method: 'DELETE' });
+  const res = await fetch(`${BASE}${path}`, { method: 'DELETE', headers: authHeaders() });
   if (!res.ok) {
     const text = await res.text().catch(() => '');
     throw new Error(`${res.status} ${res.statusText}${text ? ': ' + text : ''}`);
