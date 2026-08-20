@@ -90,6 +90,7 @@
     "tableInput": "输入",
     "tableOutput": "输出",
     "tableTotalTokens": "总 Tokens",
+    "tableCacheHitRate": "缓存率",
     "tableCost": "费用",
     "trendTitle": "用量趋势",
     "trendCost": "费用",
