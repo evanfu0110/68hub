@@ -144,34 +144,43 @@ export function TokenStats() {
                 <th className="text-right">{t('tokenStats.tableInput')}</th>
                 <th className="text-right">{t('tokenStats.tableOutput')}</th>
                 <th className="text-right">{t('tokenStats.tableTotalTokens')}</th>
+                <th className="text-right">{t('tokenStats.tableCacheHitRate')}</th>
                 <th className="text-right">{t('tokenStats.tableCost')}</th>
               </tr>
             </thead>
             <tbody>
               {stats.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-8 text-base-content/40 text-sm">
+                  <td colSpan={7} className="text-center py-8 text-base-content/40 text-sm">
                     {t('common.noData')}
                   </td>
                 </tr>
               ) : (
-                stats.map((m: ModelTokenStat) => (
-                  <tr key={m.model} className="hover">
-                    <td className="text-sm font-medium">
-                      <div className="flex items-center gap-1.5">
-                        <ModelIcon model={m.model} />
-                        <span>{m.model}</span>
-                      </div>
-                    </td>
-                    <td className="text-right text-sm tabular-nums">{m.request_count.toLocaleString()}</td>
-                    <td className="text-right text-sm tabular-nums">{m.total_input_tokens.toLocaleString()}</td>
-                    <td className="text-right text-sm tabular-nums">{m.total_output_tokens.toLocaleString()}</td>
-                    <td className="text-right text-sm tabular-nums">
-                      {(m.total_input_tokens + m.total_output_tokens).toLocaleString()}
-                    </td>
-                    <td className="text-right text-sm tabular-nums">${m.total_cost_usd.toFixed(6)}</td>
-                  </tr>
-                ))
+                stats.map((m: ModelTokenStat) => {
+                  const uncached = Number(m.uncached_input_tokens ?? m.total_input_tokens ?? 0);
+                  const hit = Number(m.cache_hit_tokens ?? 0);
+                  const write = Number(m.cache_write_tokens ?? 0);
+                  const totalIn = uncached + hit + write;
+                  const rate = totalIn > 0 ? (hit / totalIn) * 100 : 0;
+                  return (
+                    <tr key={m.model} className="hover">
+                      <td className="text-sm font-medium">
+                        <div className="flex items-center gap-1.5">
+                          <ModelIcon model={m.model} />
+                          <span>{m.model}</span>
+                        </div>
+                      </td>
+                      <td className="text-right text-sm tabular-nums">{m.request_count.toLocaleString()}</td>
+                      <td className="text-right text-sm tabular-nums">{m.total_input_tokens.toLocaleString()}</td>
+                      <td className="text-right text-sm tabular-nums">{m.total_output_tokens.toLocaleString()}</td>
+                      <td className="text-right text-sm tabular-nums">
+                        {(m.total_input_tokens + m.total_output_tokens).toLocaleString()}
+                      </td>
+                      <td className="text-right text-sm tabular-nums">{rate.toFixed(1)}%</td>
+                      <td className="text-right text-sm tabular-nums">${m.total_cost_usd.toFixed(6)}</td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

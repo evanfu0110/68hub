@@ -90,6 +90,7 @@
     "tableInput": "Input",
     "tableOutput": "Output",
     "tableTotalTokens": "Total Tokens",
+    "tableCacheHitRate": "Cache Rate",
     "tableCost": "Cost",
     "trendTitle": "Usage Trend",
     "trendCost": "Cost",
